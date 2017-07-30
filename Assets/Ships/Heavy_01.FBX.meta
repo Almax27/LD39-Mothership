@@ -43,6 +43,7 @@ ModelImporter:
     2300018: Object006
     2300020: Object007
     2300022: Object008
+    2300024: //RootNode
     3300000: Box007
     3300002: Box008
     3300004: Box009
@@ -55,6 +56,7 @@ ModelImporter:
     3300018: Object006
     3300020: Object007
     3300022: Object008
+    3300024: //RootNode
     4300000: Box007
     4300002: Object004
     4300004: Box008
