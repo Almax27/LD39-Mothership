@@ -15,6 +15,10 @@ public class Fleet : MonoBehaviour {
 
     public float engagementRange = 10;
 
+    public CircleMeshGenerator selectCircle = null;
+    public CircleMeshGenerator highlightCircle = null;
+    public CircleMeshGenerator engagementRangeCircle = null;
+
     protected List<Ship> activeShips = new List<Ship>();
 
     protected bool formationDirty = true;
@@ -29,8 +33,10 @@ public class Fleet : MonoBehaviour {
 
     private void Start()
     {
-        Debug.Assert(fleetFormationPrefab, "No FleetFormation given");
-        Debug.AssertFormat(fleetFormationPrefab.GetMaxSupportedShips() >= maxShipCount, "{0} does not support {1} ships", fleetFormationPrefab.name, maxShipCount);
+        if(fleetFormationPrefab && fleetFormationPrefab.GetMaxSupportedShips() < maxShipCount)
+        {
+            Debug.LogWarningFormat("{0} does not support {1} ships", fleetFormationPrefab.name, maxShipCount);
+        }
 
         targetMovePosition = transform.position;
 
@@ -38,6 +44,20 @@ public class Fleet : MonoBehaviour {
         {
             Reinforce();
         }
+
+        //resize engagementCircle
+        if (engagementRangeCircle)
+        {
+            float thickness = Mathf.Max(0, engagementRangeCircle.outerRadius - engagementRangeCircle.innerRadius);
+            engagementRangeCircle.innerRadius = engagementRange - thickness * 0.5f;
+            engagementRangeCircle.outerRadius = engagementRange + thickness * 0.5f;
+            engagementRangeCircle.Generate();
+        }
+
+        RefreshCircleColors();
+
+        OnUnhighted();
+        OnDeselected();
     }
 
     private void LateUpdate()
@@ -62,7 +82,7 @@ public class Fleet : MonoBehaviour {
 
     public void UpdateFormation()
     {
-        if (formationDirty)
+        if (fleetFormationPrefab && formationDirty)
         {
             currentFormation = fleetFormationPrefab.GetBestShipFormation(activeShips.Count);
             formationDirty = false;
@@ -70,15 +90,17 @@ public class Fleet : MonoBehaviour {
 
         isTurning = false;
         isMoving = false;
-        if (currentFormation)
+
+        foreach (Ship ship in activeShips)
         {
-            isTurning = !currentFormation.TurnShipsToFace(activeShips, targetTurnAngle);
-            if (!isTurning)
-            {
-                Vector3.SmoothDamp(transform.position, targetMovePosition, ref moveVelocity, 0.4f, maxFormationSpeed);
-                isMoving = moveVelocity.sqrMagnitude > 0.01f;
-            }
+            isTurning |= ship.Turn(targetTurnAngle);
         }
+        if (!isTurning)
+        {
+            Vector3.SmoothDamp(transform.position, targetMovePosition, ref moveVelocity, 0.4f, maxFormationSpeed);
+            isMoving = moveVelocity.sqrMagnitude > 0.01f;
+        }
+
         if(!isMoving)
         {
             float deceleration = 10.0f;
@@ -89,8 +111,17 @@ public class Fleet : MonoBehaviour {
 
         if (currentFormation)
         {
-            currentFormation.transform.position = transform.position;
-            currentFormation.MoveShipsIntoFormation(activeShips);
+            for (int i = 0; i < activeShips.Count; i++)
+            {
+                activeShips[i].MoveToLocal(currentFormation.GetPositionAt(i));
+            }
+        }
+        else
+        {
+            for (int i = 0; i < activeShips.Count; i++)
+            {
+                activeShips[i].MoveToLocal(Vector3.zero);
+            }
         }
     }
 
@@ -123,6 +154,21 @@ public class Fleet : MonoBehaviour {
         }
     }
 
+    public void RefreshCircleColors()
+    {
+        //update selection circle to match team colour
+        if (selectCircle && selectCircle.meshRenderer)
+        {
+            var material = selectCircle.meshRenderer.material;
+            if (material)
+            {
+                Color teamColor = GameManager.GetTeamColor(team);
+                teamColor.a = material.color.a;
+                material.color = teamColor;
+            }
+        }
+    }
+
     public bool CanReinforce()
     {
         return activeShips.Count < maxShipCount;
@@ -135,6 +181,7 @@ public class Fleet : MonoBehaviour {
             if (CanReinforce())
             {
                 GameObject gobj = Instantiate<GameObject>(shipPrefab.gameObject);
+                gobj.transform.parent = this.transform;
                 Ship newShip = gobj.GetComponent<Ship>();
                 newShip.team = team;
                 activeShips.Add(newShip);
@@ -198,12 +245,26 @@ public class Fleet : MonoBehaviour {
 
     void OnHighlighted()
     {
-
+        if(highlightCircle)
+        {
+            highlightCircle.gameObject.SetActive(true);
+        }
+        if(engagementRangeCircle)
+        {
+            engagementRangeCircle.gameObject.SetActive(true);
+        }
     }
 
     void OnUnhighted()
     {
-
+        if (highlightCircle)
+        {
+            highlightCircle.gameObject.SetActive(false);
+        }
+        if (engagementRangeCircle)
+        {
+            engagementRangeCircle.gameObject.SetActive(false);
+        }
     }
 
     public void SetIsSelected(bool _isSelected)
@@ -224,12 +285,18 @@ public class Fleet : MonoBehaviour {
 
     void OnSelected()
     {
-
+        if (selectCircle)
+        {
+            selectCircle.gameObject.SetActive(true);
+        }
     }
 
     void OnDeselected()
     {
-
+        if (selectCircle)
+        {
+            selectCircle.gameObject.SetActive(false);
+        }
     }
 
     public void SetIsTargeted(bool _isTargeted)
@@ -260,15 +327,6 @@ public class Fleet : MonoBehaviour {
 
     private void OnDrawGizmos()
     {
-        if(isHighlighted)
-        {
-            DebugExtension.DrawCircle(transform.position, Color.white, 0.5f);
-            DebugExtension.DrawCircle(transform.position, Color.red, engagementRange);
-        }
-        if (isSelected)
-        {
-            DebugExtension.DrawCircle(transform.position, GameManager.GetTeamColor(team), 0.4f);
-        }
         if(targetedFleet)
         {
             Gizmos.color = new Color(1,0,0, 0.4f);

@@ -17,20 +17,25 @@ public class Ship : MonoBehaviour {
 
     Fleet targetFleet = null;
 
-    public void MoveTo(Vector3 position)
+    public void MoveToLocal(Vector3 position)
     {
-        transform.position = position;
+        transform.localPosition = position;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="angle"></param>
+    /// <returns> true if turning </returns>
     public bool Turn(float angle)
     {
-        bool finishedTurning = true;
+        bool isTurning = false;
         targetFacingAngle = angle;
         if (maxTurnTime > 0)
         {
-            finishedTurning = Mathf.Abs(currentFacingAngle - targetFacingAngle) < 0.1f;
+            isTurning = Mathf.Abs(currentFacingAngle - targetFacingAngle) > 0.1f;
         }
-        return finishedTurning;
+        return isTurning;
     }
 
     public void AttackFleet(Fleet fleetToAttack)
