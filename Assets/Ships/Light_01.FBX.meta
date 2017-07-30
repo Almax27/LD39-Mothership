@@ -11,27 +11,40 @@ ModelImporter:
     100006: //RootNode
     100008: Line001
     100010: Line002
+    100012: Cylinder013
+    100014: Object009
     400000: Box002
     400002: Box003
     400004: Cylinder001
     400006: //RootNode
     400008: Line001
     400010: Line002
+    400012: Cylinder013
+    400014: Object009
     2300000: Box002
     2300002: Box003
     2300004: Cylinder001
     2300006: Line001
     2300008: Line002
+    2300010: //RootNode
+    2300012: Cylinder013
+    2300014: Object009
     3300000: Box002
     3300002: Box003
     3300004: Cylinder001
     3300006: Line001
     3300008: Line002
+    3300010: //RootNode
+    3300012: Cylinder013
+    3300014: Object009
     4300000: Line001
     4300002: Cylinder001
     4300004: Box002
     4300006: Line002
     4300008: Box003
+    4300010: Cylinder013
+    4300012: Object009
+    4300014: Light_01
   materials:
     importMaterials: 1
     materialName: 0
