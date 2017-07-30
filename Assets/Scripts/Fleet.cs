@@ -6,7 +6,7 @@ public class Fleet : MonoBehaviour {
 
     public int team = -1;
 
-    public FleetFormation fleetFormationPrefab = null;
+    public FleetShipFormations fleetFormationPrefab = null;
     public Ship shipPrefab = null;
     public int startingShipCount = 3;
     public int maxShipCount = 5;
@@ -18,21 +18,21 @@ public class Fleet : MonoBehaviour {
     protected List<Ship> activeShips = new List<Ship>();
 
     protected bool formationDirty = true;
-    protected bool formationMoving = false;
+    protected bool isMoving = false;
+    protected bool isTurning = false;
     protected ShipFormation currentFormation = null;
-    protected Vector3 formationPosition = Vector3.zero;
-    protected Vector3 formationVelocity = Vector3.zero;
-    protected float formationAngle = 0;
+    protected Vector3 targetMovePosition = Vector3.zero;
+    protected Vector3 moveVelocity = Vector3.zero;
+    protected float targetTurnAngle = 0;
 
     protected Fleet targetedFleet = null;
-
 
     private void Start()
     {
         Debug.Assert(fleetFormationPrefab, "No FleetFormation given");
         Debug.AssertFormat(fleetFormationPrefab.GetMaxSupportedShips() >= maxShipCount, "{0} does not support {1} ships", fleetFormationPrefab.name, maxShipCount);
 
-        formationPosition = transform.position;
+        targetMovePosition = transform.position;
 
         for (int i = 0; i < startingShipCount; i++)
         {
@@ -42,7 +42,8 @@ public class Fleet : MonoBehaviour {
 
     private void LateUpdate()
     {
-        activeShips.RemoveAll(delegate (Ship ship) {
+        activeShips.RemoveAll(delegate (Ship ship) 
+        {
             if (ship == null)
             {
                 formationDirty = true;
@@ -66,21 +67,28 @@ public class Fleet : MonoBehaviour {
             currentFormation = fleetFormationPrefab.GetBestShipFormation(activeShips.Count);
             formationDirty = false;
         }
-        
-        if(currentFormation)
+
+        isTurning = false;
+        isMoving = false;
+        if (currentFormation)
         {
-            if (currentFormation.TurnShipsToFace(activeShips, formationAngle) && formationMoving)
+            isTurning = !currentFormation.TurnShipsToFace(activeShips, targetTurnAngle);
+            if (!isTurning)
             {
-                Vector3.SmoothDamp(transform.position, formationPosition, ref formationVelocity, 0.4f, maxFormationSpeed);
-                formationMoving = formationVelocity.sqrMagnitude > 0.01f;
+                Vector3.SmoothDamp(transform.position, targetMovePosition, ref moveVelocity, 0.4f, maxFormationSpeed);
+                isMoving = moveVelocity.sqrMagnitude > 0.01f;
             }
-            else
-            {
-                float deceleration = 10.0f;
-                formationVelocity = Vector3.MoveTowards(formationVelocity, Vector3.zero, Time.deltaTime * deceleration);
-                //Vector3.SmoothDamp(transform.position, transform.position, ref formationVelocity, 0.8f);
-            }
-            transform.position += formationVelocity * Time.deltaTime;
+        }
+        if(!isMoving)
+        {
+            float deceleration = 10.0f;
+            moveVelocity = Vector3.MoveTowards(moveVelocity, Vector3.zero, Time.deltaTime * deceleration);
+        }
+
+        transform.position += moveVelocity * Time.deltaTime;
+
+        if (currentFormation)
+        {
             currentFormation.transform.position = transform.position;
             currentFormation.MoveShipsIntoFormation(activeShips);
         }
@@ -88,31 +96,29 @@ public class Fleet : MonoBehaviour {
 
     void UpdateAttack()
     {
-        if(targetedFleet)
+        bool isAttacking = false;
+        if(targetedFleet && !isMoving && !isTurning)
         {
             Vector3 attackVector = targetedFleet.transform.position - transform.position;
-            if (attackVector.sqrMagnitude > engagementRange * engagementRange)
+            if (attackVector.sqrMagnitude <= (engagementRange * engagementRange) + 0.1f)
             {
-                Vector3 attackPosition = targetedFleet.transform.position - attackVector.normalized * engagementRange;
-                MoveFleetTo(attackPosition);
-
-                //stop ships attacking while we move
-                foreach (Ship ship in activeShips)
-                {
-                    ship.AttackFleet(null);
-                }
-            }
-            else
-            {
+                isAttacking = true;
                 //aim once we've stopped moving
-                if (!formationMoving)
+                if (!isMoving)
                 {
-                    formationAngle = Quaternion.LookRotation(targetedFleet.transform.position - transform.position).eulerAngles.y;
+                    targetTurnAngle = Quaternion.LookRotation(targetedFleet.transform.position - transform.position).eulerAngles.y;
                 }
                 foreach (Ship ship in activeShips)
                 {
                     ship.AttackFleet(targetedFleet);
                 }
+            }
+        }
+        if(!isAttacking)
+        {
+            foreach (Ship ship in activeShips)
+            {
+                ship.AttackFleet(null);
             }
         }
     }
@@ -140,20 +146,23 @@ public class Fleet : MonoBehaviour {
 
     public void MoveFleetTo(Vector3 position)
     {
-        if (Vector3.Distance(position, formationPosition) > 0.1f)
+        if (Vector3.Distance(position, targetMovePosition) > 0.1f)
         {
-            formationPosition = position;
-            formationAngle = Quaternion.LookRotation(position - transform.position).eulerAngles.y;
+            targetMovePosition = position;
+            targetTurnAngle = Quaternion.LookRotation(position - transform.position).eulerAngles.y;
             formationDirty = true;
-            formationMoving = true;
-            targetedFleet = null;
+            isMoving = true;
         }
+    }
+
+    public void StopMoving()
+    {
+        isMoving = false;
     }
 
     public void AttackOtherFleet(Fleet fleetToAttack)
     {
         targetedFleet = fleetToAttack;
-        formationMoving = false;
     }
 
     public Ship GetShipToAttack()
@@ -258,11 +267,12 @@ public class Fleet : MonoBehaviour {
         }
         if (isSelected)
         {
-            DebugExtension.DrawCircle(transform.position, Color.cyan, 0.4f);
+            DebugExtension.DrawCircle(transform.position, GameManager.GetTeamColor(team), 0.4f);
         }
         if(targetedFleet)
         {
-            DebugExtension.DrawArrow(transform.position, targetedFleet.transform.position - transform.position, Color.red);
+            Gizmos.color = new Color(1,0,0, 0.4f);
+            Gizmos.DrawLine(transform.position, targetedFleet.transform.position);
         }
     }
 }

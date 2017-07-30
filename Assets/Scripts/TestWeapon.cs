@@ -4,11 +4,19 @@ using UnityEngine;
 
 public class TestWeapon : ShipWeapon{
 
+    Ship owningShip = null;
+    Fleet targetFleet = null;
     Ship targetShip = null;
 
     public float attackTick = 0;
     public float attackRate = 0.5f;
     public int damage = 10;
+
+    public override void AttackFleet(Ship _owningShip, Fleet _targetFleet)
+    {
+        owningShip = _owningShip;
+        targetFleet = _targetFleet;
+    }
 
     private void Start()
     {
@@ -18,7 +26,7 @@ public class TestWeapon : ShipWeapon{
     // Update is called once per frame
     void Update () {
 
-		if(targetFleet)
+		if(owningShip && targetFleet)
         {
             if (targetShip)
             {
@@ -31,6 +39,8 @@ public class TestWeapon : ShipWeapon{
                     packet.value = damage;
                     packet.direction = (targetShip.transform.position - transform.position).normalized;
                     packet.Send(targetShip.gameObject);
+
+                    Debug.DrawLine(transform.position, targetShip.transform.position, GameManager.GetTeamColor(owningShip.team), 0.2f);
                 }
             }
             else

@@ -9,12 +9,15 @@ public class FleetCommander : MonoBehaviour
 {
     bool isDragingArea = false;
     Vector3 mouseDownPosition;
-    Fleet hoverHighlightedSelectable = null;
+    Vector3 mouseDownActionPosition;
     List<Fleet> selectedList = new List<Fleet>();
+    List<Fleet> highlightedList = new List<Fleet>();
 
     public int teamToSelect = -1;
     public float minDragDistance = 5;
     public float maxSelectionDistance = 20;
+    public List<Formation> selectionMoveFormations = new List<Formation>();
+    public float attackMoveSpreadDegrees = 20.0f;
 
     void Update()
     {
@@ -30,59 +33,63 @@ public class FleetCommander : MonoBehaviour
             mouseDownPosition = Input.mousePosition;
             DeselectAll();
         }
-        if (Input.GetMouseButton(0))
+        if (isDragingArea || Input.GetMouseButton(0))
         {
-            if (isDragingArea || Vector3.Distance(mouseDownPosition, Input.mousePosition) > minDragDistance)
+            if (Vector3.Distance(mouseDownPosition, Input.mousePosition) > minDragDistance)
             {
                 isDragingArea = true;
                 foreach (var selectable in FindObjectsOfType<Fleet>())
                 {
-                    bool highlight = CanSelect(selectable) && InSelectionBounds(selectable);
-                    selectable.SetIsHighlighted(highlight);
+                    if (selectable.IsHighlighted || CanHighlight(selectable))
+                    {
+                        bool highlight = CanSelect(selectable) && InSelectionBounds(selectable);
+                        if (highlight != selectable.IsHighlighted)
+                        {
+                            selectable.SetIsHighlighted(highlight);
+                            if (highlight && !highlightedList.Contains(selectable))
+                            {
+                                highlightedList.Add(selectable);
+                            }
+                            else
+                            {
+                                highlightedList.Remove(selectable);
+                            }
+                        }
+                    }
                 }
             }
         }
         else
         {
             Fleet closestSelectable = GetClosestSelectable();
-            if (closestSelectable != hoverHighlightedSelectable)
+            foreach(Fleet selectable in highlightedList)
             {
-                if (hoverHighlightedSelectable) hoverHighlightedSelectable.SetIsHighlighted(false);
-                if (closestSelectable) closestSelectable.SetIsHighlighted(true);
-                hoverHighlightedSelectable = closestSelectable;
+                if(selectable != closestSelectable)
+                {
+                    selectable.SetIsHighlighted(false);
+                }
+            }
+            highlightedList.Clear();
+            if (closestSelectable)
+            {
+                closestSelectable.SetIsHighlighted(true);
+                highlightedList.Add(closestSelectable);
             }
         }
         // If we let go of the left mouse button, end selection
         if (Input.GetMouseButtonUp(0))
         {
-            DeselectAll();
-
-            if (isDragingArea)
-            { //area select
-
-                foreach (var selectable in FindObjectsOfType<Fleet>())
-                {
-                    if (CanSelect(selectable) && selectable.IsHighlighted)
-                    {
-                        selectedList.Add(selectable);
-                    }
-                }
-            }
-            else if (hoverHighlightedSelectable) //single select
-            {
-                if (CanSelect(hoverHighlightedSelectable))
-                {
-                    selectedList.Add(hoverHighlightedSelectable);
-                    hoverHighlightedSelectable = null;
-                }
-            }
-
             //perform selection
-            foreach (var selectable in selectedList)
+            foreach (var selectable in highlightedList)
             {
-                selectable.SetIsHighlighted(false);
-                selectable.SetIsSelected(true);
+                if (CanSelect(selectable))
+                {
+                    selectable.SetIsHighlighted(false);
+                    selectable.SetIsSelected(true);
+                    selectedList.Add(selectable);
+                } 
             }
+            highlightedList.Clear();
 
             { //log selection information
                 var sb = new StringBuilder();
@@ -100,25 +107,45 @@ public class FleetCommander : MonoBehaviour
 
     void ProcessActions()
     {
-        if (Input.GetMouseButtonUp(1))
+        if (Input.GetMouseButtonUp(1) && selectedList.Count > 0)
         {
-            if (hoverHighlightedSelectable)
+            if (highlightedList.Count == 1)
             {
+                Fleet highlighted = highlightedList[0];
                 //attack if enemy
-                if(hoverHighlightedSelectable.team != teamToSelect)
+                if (highlighted.team != teamToSelect)
                 {
-                    foreach (Fleet selectable in selectedList)
+                    Vector3 leaderPosition = selectedList[0].transform.position;
+                    Vector3 attackVector = highlighted.transform.position - leaderPosition;
+                    for(int i = 0; i < selectedList.Count; i++)
                     {
-                        selectable.AttackOtherFleet(hoverHighlightedSelectable);
+                        Fleet selectable = selectedList[i];
+
+                        //move closer if we need to
+                        if (attackVector.sqrMagnitude > selectable.engagementRange * selectable.engagementRange)
+                        {
+                            float rotDir = i % 2 == 0 ? 1 : -1;
+                            attackVector = Quaternion.Euler(0, rotDir * i * 0.5f * attackMoveSpreadDegrees, 0.0f) * attackVector;
+                            Vector3 attackPosition = highlighted.transform.position - attackVector.normalized * (selectable.engagementRange - 0.5f);
+                            selectable.MoveFleetTo(attackPosition);
+                        }
+
+                        //attack
+                        selectable.AttackOtherFleet(highlighted);
                     }
                 }
             }
             else
             {//move
-                Vector3 mapPosition = ScreenToMapPosition(Input.mousePosition);                
-                foreach (Fleet selectable in selectedList)
+                Vector3 mapPosition = ScreenToMapPosition(Input.mousePosition);
+                Formation formation = Formation.SelectBestFormation<Formation>(selectionMoveFormations, selectedList.Count);
+                if(formation)
                 {
-                    selectable.MoveFleetTo(mapPosition);
+                    for (int i = 0; i < selectedList.Count; i++)
+                    {
+                        selectedList[i].AttackOtherFleet(null);
+                        selectedList[i].MoveFleetTo(mapPosition + formation.GetPositionAt(i));
+                    }
                 }
             }
         }
@@ -128,6 +155,11 @@ public class FleetCommander : MonoBehaviour
     {
         bool canSelect = teamToSelect < 0 || selectable.team == teamToSelect;
         return canSelect;
+    }
+
+    public bool CanHighlight(Fleet selectable)
+    {
+        return highlightedList.Count < Formation.GetMaxCountSupported<Formation>(selectionMoveFormations);
     }
 
     public bool InSelectionBounds(Fleet selectionObject)
@@ -179,7 +211,6 @@ public class FleetCommander : MonoBehaviour
         foreach (var selectable in selectedList)
         {
             selectable.SetIsSelected(false);
-            selectable.SetIsHighlighted(false);
         }
         selectedList.Clear();
     }

@@ -38,17 +38,18 @@ public class Ship : MonoBehaviour {
         targetFleet = fleetToAttack;
         if (weapon)
         {
-            weapon.targetFleet = fleetToAttack;
+            weapon.AttackFleet(this, targetFleet);
         }
     }
 
     // Use this for initialization
     void Start () {
-        foreach(Renderer renderer in GetComponentsInChildren<Renderer>())
+        Color teamColor = GameManager.GetTeamColor(team);
+        foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
         {
             if(renderer.material)
             {
-                renderer.material.color = team == 0 ? Color.cyan : Color.red;
+                renderer.material.color = teamColor;
             }
         }
         health = maxHealth;

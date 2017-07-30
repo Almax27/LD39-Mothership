@@ -59,4 +59,4 @@ MonoBehaviour:
   startingShipCount: 5
   maxShipCount: 5
   maxFormationSpeed: 5
-  engagementRange: 10
+  engagementRange: 5

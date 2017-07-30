@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 4724018049945342}
   - component: {fileID: 114465267508653148}
   m_Layer: 0
-  m_Name: BasicFleetFormation
+  m_Name: BasicFleetShipFormations
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -52,4 +52,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShipFormations:
-  - {fileID: 114484131486775712, guid: 52a03d6178e41194fa48126f8f2ad9a4, type: 2}
+  - {fileID: 114088778105862222, guid: 52a03d6178e41194fa48126f8f2ad9a4, type: 2}

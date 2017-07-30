@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShipWeapon : MonoBehaviour {
+public abstract class ShipWeapon : MonoBehaviour {
 
-    public Fleet targetFleet = null;
+    public abstract void AttackFleet(Ship _owningShip, Fleet _targetFleet);
 }

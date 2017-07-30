@@ -478,10 +478,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2063402445306834194bcfcef93cf804, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetFleet: {fileID: 0}
   attackTick: 0
-  attackRate: 0.5
-  damage: 10
+  attackRate: 1
+  damage: 2
 --- !u!114 &114408699105165114
 MonoBehaviour:
   m_ObjectHideFlags: 1
