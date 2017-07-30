@@ -40,6 +40,7 @@ GameObject:
   - component: {fileID: 92913584845268064}
   - component: {fileID: 124042690372680400}
   - component: {fileID: 81986806331032596}
+  - component: {fileID: 45734133936419850}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -83,7 +84,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 1, g: 1, b: 1, a: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -110,6 +111,14 @@ Camera:
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
   m_StereoMirrorMode: 0
+--- !u!45 &45734133936419850
+Skybox:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1573919907270826}
+  m_Enabled: 1
+  m_CustomSkybox: {fileID: 2100000, guid: 7844a3445c738044d98c9e6f0a17b4d9, type: 2}
 --- !u!81 &81986806331032596
 AudioListener:
   m_ObjectHideFlags: 1
@@ -148,9 +157,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74c9dade51db1ad4da54e55b46b8d14d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  teamToSelect: -1
+  teamToSelect: 0
   minDragDistance: 5
   maxSelectionDistance: 30
+  selectionMoveFormations:
+  - {fileID: 114502772141026294, guid: 1d45daa8b51e2b746b2900d01994e142, type: 2}
+  attackMoveSpreadDegrees: 20
 --- !u!124 &124042690372680400
 Behaviour:
   m_ObjectHideFlags: 1
