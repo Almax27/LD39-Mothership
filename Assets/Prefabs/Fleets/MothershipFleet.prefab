@@ -19,7 +19,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4241884746311910}
-  - component: {fileID: 114127340015929168}
+  - component: {fileID: 114407767768868510}
   - component: {fileID: 114877084410844348}
   m_Layer: 0
   m_Name: MothershipFleet
@@ -254,29 +254,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1066568836823102}
   m_Mesh: {fileID: 0}
---- !u!114 &114127340015929168
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1046760146633856}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23b0f5911f2e9144dae718c314ae80a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  team: 0
-  fleetFormationPrefab: {fileID: 0}
-  shipPrefab: {fileID: 114468535184008744, guid: a5ce7d2af51050e40a90033df8dfa8d7,
-    type: 2}
-  startingShipCount: 1
-  maxShipCount: 1
-  canBeMultiSelected: 0
-  maxFormationSpeed: 2
-  engagementRange: 0
-  selectCircle: {fileID: 114269506766830584}
-  highlightCircle: {fileID: 114744377142332350}
-  engagementRangeCircle: {fileID: 114807252508898362}
 --- !u!114 &114269506766830584
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -293,6 +270,37 @@ MonoBehaviour:
   segmentCount: 50
   meshRenderer: {fileID: 23343277894010618}
   meshFilter: {fileID: 33834790176133140}
+--- !u!114 &114407767768868510
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1046760146633856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b96e437626e1c24bb6100b1d09214e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  team: 0
+  powerCostToSpawn: 100
+  fleetFormationPrefab: {fileID: 0}
+  shipPrefab: {fileID: 114468535184008744, guid: a5ce7d2af51050e40a90033df8dfa8d7,
+    type: 2}
+  startingShipCount: 1
+  maxShipCount: 1
+  canBeMultiSelected: 0
+  canBeAddedToControlGroups: 0
+  maxFormationSpeed: 2
+  engagementRange: 0
+  selectCircle: {fileID: 114269506766830584}
+  highlightCircle: {fileID: 114744377142332350}
+  engagementRangeCircle: {fileID: 114807252508898362}
+  initialPower: 500
+  maxPower: 1000
+  spline: {fileID: 0}
+  splineMoveDuration: 0
+  lookForward: 0
+  mode: 0
 --- !u!114 &114744377142332350
 MonoBehaviour:
   m_ObjectHideFlags: 1

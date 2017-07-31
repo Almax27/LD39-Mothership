@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour {
     Camera camera = null;
 
     bool returningToMotherShip = false;
-    Mothership mothership = null;
+    MothershipFleet mothershipFleet = null;
 
     Vector3 cameraVelocity = Vector3.zero;
 
@@ -40,12 +40,11 @@ public class PlayerController : MonoBehaviour {
 
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            mothership = FindObjectOfType<Mothership>();
+            mothershipFleet = FindObjectOfType<MothershipFleet>();
 
             FleetCommander commander = GetComponent<FleetCommander>();
-            if(commander && mothership)
+            if(commander && mothershipFleet)
             {
-                Fleet mothershipFleet = mothership.GetComponentInParent<Fleet>();
                 if(mothershipFleet.IsSelected)
                 {
                     returningToMotherShip = true;
@@ -69,10 +68,10 @@ public class PlayerController : MonoBehaviour {
         if (returningToMotherShip && rawInputVector.sqrMagnitude <= 0.01f)
         {
             returningToMotherShip = false;
-            if (mothership)
+            if (mothershipFleet)
             {
-                Vector3.SmoothDamp(transform.position, mothership.transform.position, ref cameraVelocity, 0.3f);
-                returningToMotherShip = (transform.position - mothership.transform.position).sqrMagnitude > 1.0f;
+                Vector3.SmoothDamp(transform.position, mothershipFleet.transform.position, ref cameraVelocity, 0.3f);
+                returningToMotherShip = (transform.position - mothershipFleet.transform.position).sqrMagnitude > 1.0f;
             }
         }
         else

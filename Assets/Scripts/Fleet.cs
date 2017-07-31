@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class Fleet : MonoBehaviour {
 
+    [Header("Fleet Configuration")]
     public int team = -1;
+    public int powerCostToSpawn = 100;
 
     public FleetShipFormations fleetFormationPrefab = null;
     public Ship shipPrefab = null;
     public int startingShipCount = 3;
     public int maxShipCount = 5;
     public bool canBeMultiSelected = true;
+    public bool canBeAddedToControlGroups = true;
 
     public float maxFormationSpeed = 5;
 
@@ -20,6 +23,7 @@ public class Fleet : MonoBehaviour {
     public CircleMeshGenerator highlightCircle = null;
     public CircleMeshGenerator engagementRangeCircle = null;
 
+    [Header("Fleet State")]
     protected List<Ship> activeShips = new List<Ship>();
 
     protected bool formationDirty = true;
@@ -34,7 +38,10 @@ public class Fleet : MonoBehaviour {
     protected Fleet defendedFleet = null;
     protected Vector3 defensivePosition = Vector3.zero;
 
-    private void Start()
+    public int ControlGroup { get { return controlGroup; } set { controlGroup = value; } }
+    protected int controlGroup = -1;
+
+    protected virtual void Start()
     {
         if(fleetFormationPrefab && fleetFormationPrefab.GetMaxSupportedShips() < maxShipCount)
         {
@@ -63,7 +70,7 @@ public class Fleet : MonoBehaviour {
         OnDeselected();
     }
 
-    private void LateUpdate()
+    protected virtual void LateUpdate()
     {
         activeShips.RemoveAll(delegate (Ship ship) 
         {
@@ -362,6 +369,20 @@ public class Fleet : MonoBehaviour {
         {
             Gizmos.color = new Color(1,0,0, 0.4f);
             Gizmos.DrawLine(transform.position, targetedFleet.transform.position);
+        }
+    }
+
+    protected virtual void OnGUI()
+    {
+        if(controlGroup >= 0 && isSelected)
+        {
+            Vector2 screenPos = Camera.main.WorldToScreenPoint(transform.position);
+            screenPos.y = Camera.main.pixelHeight - screenPos.y;
+            Vector2 guiPos = GUIUtility.ScreenToGUIPoint(screenPos);
+            Vector2 size = new Vector2(50, 50);
+            GUIStyle style = GUI.skin.label;
+            style.alignment = TextAnchor.MiddleCenter;
+            GUI.Label(new Rect(guiPos - size * 0.5f, size), controlGroup.ToString(), style);
         }
     }
 }

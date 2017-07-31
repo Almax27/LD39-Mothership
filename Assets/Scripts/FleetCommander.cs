@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,12 +11,17 @@ public class FleetCommander : MonoBehaviour
     Vector3 mouseDownActionPosition;
     List<Fleet> selectedList = new List<Fleet>();
     List<Fleet> highlightedList = new List<Fleet>();
+    Dictionary<int, List<Fleet>> controlGroups = new Dictionary<int, List<Fleet>>();
 
     public int teamToSelect = -1;
     public float minDragDistance = 5;
     public float defaultSelectionDistance = 1.0f;
     public List<Formation> selectionMoveFormations = new List<Formation>();
     public float attackMoveSpreadDegrees = 20.0f;
+
+    public Fleet lightFleetPrefab = null;
+    public Fleet mediumFleetPrefab = null;
+    public Fleet heavyFleetPrefab = null;
 
     void Update()
     {
@@ -27,6 +31,17 @@ public class FleetCommander : MonoBehaviour
 
     void ProcessSelection()
     {
+        ProcessControlGroupSelection(1, KeyCode.Alpha1);
+        ProcessControlGroupSelection(2, KeyCode.Alpha2);
+        ProcessControlGroupSelection(3, KeyCode.Alpha3);
+        ProcessControlGroupSelection(4, KeyCode.Alpha4);
+        ProcessControlGroupSelection(5, KeyCode.Alpha5);
+        ProcessControlGroupSelection(6, KeyCode.Alpha6);
+        ProcessControlGroupSelection(7, KeyCode.Alpha7);
+        ProcessControlGroupSelection(8, KeyCode.Alpha8);
+        ProcessControlGroupSelection(9, KeyCode.Alpha9);
+        ProcessControlGroupSelection(0, KeyCode.Alpha0);
+
         // If we press the left mouse button, begin selection and remember the location of the mouse
         if (Input.GetMouseButtonDown(0))
         {
@@ -106,14 +121,37 @@ public class FleetCommander : MonoBehaviour
         }
     }
 
+    void ProcessControlGroupSelection(int index, KeyCode keyCode)
+    {
+        if (Input.GetKeyDown(keyCode))
+        {
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.LeftAlt))
+            {
+                RegisterControlGroup(index, selectedList);
+            }
+            else
+            {
+                SelectControlGroup(index);
+            }
+        }
+    }
+
     void ProcessActions()
     {
         if (selectedList.Count < 0)
             return;
 
-        if(Input.GetKeyDown(KeyCode.R))
+        if(Input.GetKeyDown(KeyCode.L))
         {
-            
+            TrySpawnFleet(lightFleetPrefab);
+        }
+        if(Input.GetKeyDown(KeyCode.M))
+        {
+            TrySpawnFleet(mediumFleetPrefab);
+        }
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            TrySpawnFleet(heavyFleetPrefab);
         }
         if (Input.GetMouseButtonUp(1))
         {
@@ -167,6 +205,63 @@ public class FleetCommander : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void RegisterControlGroup(int index, List<Fleet> group)
+    {
+        //clean exising group
+        if(controlGroups.ContainsKey(index))
+        {
+            List<Fleet> oldGroup = controlGroups[index];
+            foreach(Fleet fleet in oldGroup)
+            {
+                fleet.ControlGroup = -1;
+            }
+        }
+        List<Fleet> newGroup = new List<Fleet>();
+        foreach (Fleet fleet in group)
+        {
+            if(fleet.canBeAddedToControlGroups)
+            {
+                //remove from old group if any
+                if(controlGroups.ContainsKey(fleet.ControlGroup))
+                {
+                    controlGroups[fleet.ControlGroup].Remove(fleet);
+                }
+                //add to new group
+                newGroup.Add(fleet);
+                fleet.ControlGroup = index;
+            }
+        }
+        controlGroups[index] = newGroup;
+    }
+
+    public void SelectControlGroup(int index)
+    {
+        if (controlGroups.ContainsKey(index))
+        {
+            List<Fleet> group = controlGroups[index];
+            if (group != null)
+            {
+                Select(group);
+            }
+        }
+    }
+
+    public Fleet TrySpawnFleet(Fleet prefab)
+    {
+        MothershipFleet mothershipFleet = FindObjectOfType<MothershipFleet>();
+        if(prefab && mothershipFleet)
+        {
+            GameObject gobj = Instantiate<GameObject>(prefab.gameObject, mothershipFleet.transform.position, Quaternion.Euler(0, Random.Range(0.0f,360.0f), 0));
+            if(gobj)
+            {
+                Fleet fleet = gobj.GetComponent<Fleet>();
+                fleet.DefendOtherFleet(mothershipFleet);
+                return fleet;
+            }
+        }
+        return null;
     }
 
     public bool CanSelect(Fleet selectable)
@@ -255,6 +350,24 @@ public class FleetCommander : MonoBehaviour
         {
             selectable.SetIsSelected(true);
             selectedList.Add(selectable);
+        }
+    }
+
+    public void Select(List<Fleet> selectableList)
+    {
+        if (selectableList != null)
+        {
+            //remove from list first to avoid diselecting unnecessarily
+            selectedList = selectedList.Except(selectableList).ToList();
+            DeselectAll();
+            foreach (Fleet selectable in selectableList)
+            {
+                if (selectable)
+                {
+                    selectable.SetIsSelected(true);
+                    selectedList.Add(selectable);
+                }
+            }
         }
     }
 
