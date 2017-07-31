@@ -14,9 +14,12 @@ public class Fleet : MonoBehaviour {
     public int maxShipCount = 5;
     public bool canBeMultiSelected = true;
     public bool canBeAddedToControlGroups = true;
+    public bool willAttackWhenIdle = true;
+    public bool willAttackWhenDefending = true;
 
     public float maxFormationSpeed = 5;
 
+    public float attackRange = 10;
     public float engagementRange = 10;
 
     public CircleMeshGenerator selectCircle = null;
@@ -150,7 +153,7 @@ public class Fleet : MonoBehaviour {
         if(targetedFleet && !isMoving && !isTurning)
         {
             Vector3 attackVector = targetedFleet.transform.position - transform.position;
-            if (attackVector.sqrMagnitude <= (engagementRange * engagementRange) + 0.1f)
+            if (attackVector.sqrMagnitude <= (attackRange * attackRange) + 0.1f)
             {
                 isAttacking = true;
                 //aim once we've stopped moving
@@ -169,6 +172,26 @@ public class Fleet : MonoBehaviour {
             foreach (Ship ship in activeShips)
             {
                 ship.AttackFleet(null);
+            }
+
+            bool canAttack = willAttackWhenIdle && !isMoving && !isTurning;
+            canAttack |= willAttackWhenDefending && defendedFleet;
+            if (canAttack && !targetedFleet)
+            {
+                //search for nearby enemy fleets
+                float minDistSq = engagementRange * engagementRange;
+                foreach (Fleet fleet in FindObjectsOfType<Fleet>())
+                {
+                    if (fleet.team != this.team)
+                    {
+                        float distSq = (fleet.transform.position - this.transform.position).sqrMagnitude;
+                        if (distSq < minDistSq)
+                        {
+                            targetedFleet = fleet;
+                            minDistSq = distSq;
+                        }
+                    }
+                }
             }
         }
     }

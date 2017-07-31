@@ -7,8 +7,7 @@ public class Ship : MonoBehaviour {
     public int team = -1;
     public float maxTurnTime = 1.0f;
 
-    public int maxHealth = 100;
-    public int health = 0;
+    public int powerValue = 10;
 
     public ShipWeapon weapon = null;
     
@@ -61,7 +60,6 @@ public class Ship : MonoBehaviour {
                 }
             }
         }
-        health = maxHealth;
     }
 	
 	// Update is called once per frame
@@ -77,4 +75,21 @@ public class Ship : MonoBehaviour {
         }
         transform.rotation = Quaternion.Euler(0, currentFacingAngle, 0);
 	}
+
+    void OnDeath()
+    {
+        //HACK: spawn power only for the death of non primary team ships
+        if (team != 0)
+        {
+            GameManager gameManager = FindObjectOfType<GameManager>();
+            if (gameManager)
+            {
+                Health health = GetComponent<Health>();
+                if (health)
+                {
+                    gameManager.SpawnPowerOrbs(powerValue, transform.position, health.LastDamagePacket.source);
+                }
+            }
+        }
+    }
 }
