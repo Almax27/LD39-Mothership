@@ -11,10 +11,10 @@ FBXHeaderExtension:  {
 		Year: 2017
 		Month: 7
 		Day: 31
-		Hour: 0
-		Minute: 3
-		Second: 26
-		Millisecond: 178
+		Hour: 19
+		Minute: 34
+		Second: 35
+		Millisecond: 355
 	}
 	Creator: "FBX SDK/FBX Plugins version 2015.1"
 }
@@ -18277,13 +18277,13 @@ Objects:  {
 			Property: "Original|ApplicationVendor", "KString", "", "Autodesk"
 			Property: "Original|ApplicationName", "KString", "", "3ds Max"
 			Property: "Original|ApplicationVersion", "KString", "", "2014"
-			Property: "Original|DateTime_GMT", "DateTime", "", "30/07/2017 23:03:26.177"
+			Property: "Original|DateTime_GMT", "DateTime", "", "31/07/2017 18:34:35.355"
 			Property: "Original|FileName", "KString", "", "Z:\LudumDare\LD39-Running-out-of-Power\Assets\Ships\MotherShip_01.FBX"
 			Property: "LastSaved", "Compound", ""
 			Property: "LastSaved|ApplicationVendor", "KString", "", "Autodesk"
 			Property: "LastSaved|ApplicationName", "KString", "", "3ds Max"
 			Property: "LastSaved|ApplicationVersion", "KString", "", "2014"
-			Property: "LastSaved|DateTime_GMT", "DateTime", "", "30/07/2017 23:03:26.177"
+			Property: "LastSaved|DateTime_GMT", "DateTime", "", "31/07/2017 18:34:35.355"
 		}
 	}
 	Material: "Material::02 - Default", "" {
@@ -18394,7 +18394,7 @@ Objects:  {
 			Property: "Reflectivity", "double", "",0
 		}
 	}
-	Material: "Material::06 - Default", "" {
+	Material: "Material::TeamColor", "" {
 		Version: 102
 		ShadingModel: "phong"
 		MultiLayer: 0
@@ -18403,9 +18403,9 @@ Objects:  {
 			Property: "MultiLayer", "bool", "",0
 			Property: "EmissiveColor", "Color", "A",0,0,0
 			Property: "EmissiveFactor", "Number", "A",0
-			Property: "AmbientColor", "Color", "A",0,0.278431385755539,0.99215692281723
+			Property: "AmbientColor", "Color", "A",0.964705944061279,0.976470649242401,1
 			Property: "AmbientFactor", "Number", "A",1
-			Property: "DiffuseColor", "Color", "A",0,0.278431385755539,0.99215692281723
+			Property: "DiffuseColor", "Color", "A",0.964705944061279,0.976470649242401,1
 			Property: "DiffuseFactor", "Number", "A",1
 			Property: "Bump", "Vector3D", "",0,0,0
 			Property: "NormalMap", "Vector3D", "",0,0,0
@@ -18422,8 +18422,8 @@ Objects:  {
 			Property: "ReflectionColor", "Color", "A",0,0,0
 			Property: "ReflectionFactor", "Number", "A",1
 			Property: "Emissive", "Vector3D", "",0,0,0
-			Property: "Ambient", "Vector3D", "",0,0.278431385755539,0.99215692281723
-			Property: "Diffuse", "Vector3D", "",0,0.278431385755539,0.99215692281723
+			Property: "Ambient", "Vector3D", "",0.964705944061279,0.976470649242401,1
+			Property: "Diffuse", "Vector3D", "",0.964705944061279,0.976470649242401,1
 			Property: "Specular", "Vector3D", "",0,0,0
 			Property: "Shininess", "double", "",1.99999988079071
 			Property: "Opacity", "double", "",1
@@ -18660,7 +18660,7 @@ Objects:  {
 			Property: "UnitScaleFactor", "double", "",1
 			Property: "OriginalUnitScaleFactor", "double", "",1
 			Property: "AmbientColor", "ColorRGB", "",0,0,0
-			Property: "DefaultCamera", "KString", "", "Producer Perspective"
+			Property: "DefaultCamera", "KString", "", "Producer Top"
 			Property: "TimeMode", "enum", "",6
 			Property: "TimeProtocol", "enum", "",2
 			Property: "SnapOnFrameMode", "enum", "",0
@@ -18672,7 +18672,7 @@ Objects:  {
 	CollectionExclusive: "DisplayLayer::0_Mothership", "DisplayLayer" {
 		Properties60:  {
 			Property: "Color", "ColorRGB", "",0.890196078431373,0.6,0.6
-			Property: "Show", "bool", "",1
+			Property: "Show", "bool", "",0
 			Property: "Freeze", "bool", "",0
 			Property: "LODBox", "bool", "",0
 		}
@@ -18696,7 +18696,7 @@ Objects:  {
 	CollectionExclusive: "DisplayLayer::3_Heavy", "DisplayLayer" {
 		Properties60:  {
 			Property: "Color", "ColorRGB", "",0.109803921568627,0.109803921568627,0.694117647058824
-			Property: "Show", "bool", "",0
+			Property: "Show", "bool", "",1
 			Property: "Freeze", "bool", "",0
 			Property: "LODBox", "bool", "",0
 		}
@@ -18704,7 +18704,7 @@ Objects:  {
 	CollectionExclusive: "DisplayLayer::Heavy_01", "DisplayLayer" {
 		Properties60:  {
 			Property: "Color", "ColorRGB", "",0.549019607843137,0.345098039215686,0.882352941176471
-			Property: "Show", "bool", "",0
+			Property: "Show", "bool", "",1
 			Property: "Freeze", "bool", "",0
 			Property: "LODBox", "bool", "",0
 		}
@@ -18751,7 +18751,7 @@ Connections:  {
 	Connect: "OO", "Material::02 - Default", "Model::Cylinder006"
 	Connect: "OO", "Material::04 - Default", "Model::Cylinder006"
 	Connect: "OO", "Material::05 - Default", "Model::Cylinder006"
-	Connect: "OO", "Material::06 - Default", "Model::Cylinder006"
+	Connect: "OO", "Material::TeamColor", "Model::Cylinder006"
 	Connect: "OO", "Material::Material #33 Slot #5", "Model::Cylinder006"
 	Connect: "OO", "Material::Material #33 Slot #6", "Model::Cylinder006"
 	Connect: "OO", "Material::Material #33 Slot #7", "Model::Cylinder006"
@@ -18785,7 +18785,7 @@ Version5:  {
 		TimeLineStopTime: 153953860000
 	}
 	RendererSetting:  {
-		DefaultCamera: "Producer Perspective"
+		DefaultCamera: "Producer Top"
 		DefaultViewingMode: 0
 	}
 }

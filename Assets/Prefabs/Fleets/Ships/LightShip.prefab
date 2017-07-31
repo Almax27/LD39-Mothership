@@ -27,23 +27,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!1 &1505028108515232
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 4437981084738892}
-  - component: {fileID: 33895256787025534}
-  - component: {fileID: 23132485866853374}
-  m_Layer: 0
-  m_Name: Light_01
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!1 &1528477922140480
 GameObject:
   m_ObjectHideFlags: 0
@@ -70,6 +53,23 @@ GameObject:
   - component: {fileID: 114081622799079130}
   m_Layer: 0
   m_Name: LaserWeapon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!1 &1790670104768678
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4562069611252872}
+  - component: {fileID: 33100116392739176}
+  - component: {fileID: 23955832739586398}
+  m_Layer: 0
+  m_Name: Light_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -112,12 +112,12 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1956285398862458}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -6.02669, y: -0.00000008171213, z: -0.6854511}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4112284296428596}
-  - {fileID: 4437981084738892}
   - {fileID: 4353555926661708}
+  - {fileID: 4562069611252872}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -133,20 +133,20 @@ Transform:
   m_Children:
   - {fileID: 4947731605958382}
   m_Father: {fileID: 4115257731842856}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &4437981084738892
+--- !u!4 &4562069611252872
 Transform:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1505028108515232}
+  m_GameObject: {fileID: 1790670104768678}
   m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4115257731842856}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: -90.00001, y: 90, z: 0}
 --- !u!4 &4947731605958382
 Transform:
@@ -161,12 +161,12 @@ Transform:
   m_Father: {fileID: 4353555926661708}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &23132485866853374
+--- !u!23 &23955832739586398
 MeshRenderer:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1505028108515232}
+  m_GameObject: {fileID: 1790670104768678}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -174,9 +174,9 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 678bfd7eaaae79249a601813c99ba9bf, type: 2}
-  - {fileID: 2100000, guid: e782a83e0ee4c3c4a991f478c3105f51, type: 2}
+  - {fileID: 2100000, guid: 205d9060758004544b4d40e889aca02f, type: 2}
   - {fileID: 2100000, guid: 942453edb7084814d8badfdd88f43a5c, type: 2}
+  - {fileID: 2100000, guid: e782a83e0ee4c3c4a991f478c3105f51, type: 2}
   - {fileID: 2100000, guid: ad5c13d733d51e844bc9b06edb01bfb6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -196,12 +196,12 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!33 &33895256787025534
+--- !u!33 &33100116392739176
 MeshFilter:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1505028108515232}
+  m_GameObject: {fileID: 1790670104768678}
   m_Mesh: {fileID: 4300014, guid: b4f3902d891398e4ea2b768774fd2832, type: 3}
 --- !u!96 &96852805586169562
 TrailRenderer:
