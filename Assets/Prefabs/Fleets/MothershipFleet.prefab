@@ -265,8 +265,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c3149d2ff852fe4884f59e16550026f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  innerRadius: 2.5
-  outerRadius: 2.55
+  innerRadius: 2.6
+  outerRadius: 2.65
   segmentCount: 50
   meshRenderer: {fileID: 23343277894010618}
   meshFilter: {fileID: 33834790176133140}
@@ -312,8 +312,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c3149d2ff852fe4884f59e16550026f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  innerRadius: 2.6
-  outerRadius: 2.65
+  innerRadius: 2.7
+  outerRadius: 2.75
   segmentCount: 50
   meshRenderer: {fileID: 23037418488433086}
   meshFilter: {fileID: 33518418385418358}
