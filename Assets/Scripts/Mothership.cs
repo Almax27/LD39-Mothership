@@ -9,15 +9,4 @@ public class Mothership : Ship {
     public float movementSpeed = 2.0f;
 
     float power = 0;
-
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }

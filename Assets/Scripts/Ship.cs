@@ -53,10 +53,12 @@ public class Ship : MonoBehaviour {
         foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
         {
             var materials = renderer.materials;
-            if (materials.Length > 0)
+            foreach(Material mat in renderer.materials)
             {
-                var material = materials[materials.Length-1];
-                material.color = teamColor;
+                if(mat.name.Contains("TeamColor"))
+                {
+                    mat.color = teamColor;
+                }
             }
         }
         health = maxHealth;

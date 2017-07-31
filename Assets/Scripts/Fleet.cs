@@ -256,6 +256,33 @@ public class Fleet : MonoBehaviour {
         return activeShips[Random.Range(0, activeShips.Count)];
     }
 
+    public int GetHealth()
+    {
+        int totalHealth = 0;
+        foreach(Ship ship in activeShips)
+        {
+            Health health = ship.GetComponent<Health>();
+            if (health)
+            {
+                totalHealth += health.current;
+            }
+        }
+        return totalHealth;
+    }
+
+    public int GetMaxHealth()
+    {
+        if(shipPrefab)
+        {
+            Health health = shipPrefab.GetComponent<Health>();
+            if(health)
+            {
+                return health.max * maxShipCount;
+            }
+        }
+        return 0;
+    }
+
     public bool IsHighlighted { get { return isHighlighted; } }
     private bool isHighlighted = false;
 
