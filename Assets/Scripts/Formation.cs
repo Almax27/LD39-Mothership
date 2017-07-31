@@ -21,7 +21,7 @@ public class Formation : MonoBehaviour {
         Vector3 position = Vector3.zero;
         if(index >= 0 && index < FormationNodes.Count)
         {
-            position = FormationNodes[index].localPosition;
+            position = FormationNodes[index].position;
         }
         return position;
     }

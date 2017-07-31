@@ -15,7 +15,7 @@ public class FleetCommander : MonoBehaviour
 
     public int teamToSelect = -1;
     public float minDragDistance = 5;
-    public float maxSelectionDistance = 20;
+    public float defaultSelectionDistance = 1.0f;
     public List<Formation> selectionMoveFormations = new List<Formation>();
     public float attackMoveSpreadDegrees = 20.0f;
 
@@ -43,6 +43,7 @@ public class FleetCommander : MonoBehaviour
                     if (selectable.IsHighlighted || CanHighlight(selectable))
                     {
                         bool highlight = CanSelect(selectable) && InSelectionBounds(selectable);
+                        highlight &= selectable.canBeMultiSelected || highlightedList.Count == 0 || (highlightedList.Contains(selectable) && highlightedList.Count == 1);
                         if (highlight != selectable.IsHighlighted)
                         {
                             selectable.SetIsHighlighted(highlight);
@@ -107,7 +108,14 @@ public class FleetCommander : MonoBehaviour
 
     void ProcessActions()
     {
-        if (Input.GetMouseButtonUp(1) && selectedList.Count > 0)
+        if (selectedList.Count < 0)
+            return;
+
+        if(Input.GetKeyDown(KeyCode.R))
+        {
+            
+        }
+        if (Input.GetMouseButtonUp(1))
         {
             if (highlightedList.Count == 1)
             {
@@ -134,6 +142,15 @@ public class FleetCommander : MonoBehaviour
                         selectable.AttackOtherFleet(highlighted);
                     }
                 }
+                else
+                {
+                    for (int i = 0; i < selectedList.Count; i++)
+                    {
+                        //follow
+                        Fleet selectable = selectedList[i];
+                        selectable.DefendOtherFleet(highlighted);
+                    }
+                }
             }
             else
             {//move
@@ -144,6 +161,7 @@ public class FleetCommander : MonoBehaviour
                     for (int i = 0; i < selectedList.Count; i++)
                     {
                         selectedList[i].AttackOtherFleet(null);
+                        selectedList[i].DefendOtherFleet(null);
                         selectedList[i].MoveFleetTo(mapPosition + formation.GetPositionAt(i));
                     }
                 }
@@ -171,19 +189,23 @@ public class FleetCommander : MonoBehaviour
 
     public float GetSelectableDistance(Fleet selectionObject)
     {
-        var camera = Camera.main;
-        Vector3 screenPos = camera.WorldToScreenPoint(selectionObject.transform.position);
-        return Vector3.Distance(Input.mousePosition, screenPos);
+        if (selectionObject)
+        {
+            var mouseMapPos = ScreenToMapPosition(Input.mousePosition);
+            return Vector3.Distance(selectionObject.transform.position, mouseMapPos);
+        }
+        return float.MaxValue;
     }
 
     public Fleet GetClosestSelectable()
     {
-        float minDist = maxSelectionDistance;
+        float minDist = float.MaxValue;
         Fleet closestSelectable = null;
         foreach (var selectable in FindObjectsOfType<Fleet>())
         {
             float dist = GetSelectableDistance(selectable);
-            if (dist < minDist)
+            float selectRadius = selectable.selectCircle ? selectable.selectCircle.outerRadius : defaultSelectionDistance;
+            if (dist < minDist && dist < selectRadius)
             {
                 minDist = dist;
                 closestSelectable = selectable;
@@ -192,7 +214,7 @@ public class FleetCommander : MonoBehaviour
         return closestSelectable;
     }
 
-    public Vector3 ScreenToMapPosition(Vector3 screenPos)
+    public static bool ScreenToMapPosition(Vector3 screenPos, out Vector3 mapPos)
     {
         Vector3 worldPos = Vector3.zero;
         var camera = Camera.main;
@@ -201,8 +223,17 @@ public class FleetCommander : MonoBehaviour
         float distance = 0;
         if(mapPlane.Raycast(ray, out distance))
         {
-            worldPos = ray.GetPoint(distance);
+            mapPos = ray.GetPoint(distance);
+            return true;
         }
+        mapPos = Vector3.zero;
+        return false;
+    }
+
+    public static Vector3 ScreenToMapPosition(Vector3 screenPos)
+    {
+        Vector3 worldPos = Vector3.zero;
+        ScreenToMapPosition(screenPos, out worldPos);
         return worldPos;
     }
 
@@ -213,6 +244,18 @@ public class FleetCommander : MonoBehaviour
             selectable.SetIsSelected(false);
         }
         selectedList.Clear();
+    }
+
+    public void Select(Fleet selectable)
+    {
+        //remove from list first to avoid diselecting unnecessarily
+        selectedList.Remove(selectable);
+        DeselectAll();
+        if (selectable)
+        {
+            selectable.SetIsSelected(true);
+            selectedList.Add(selectable);
+        }
     }
 
     void OnGUI()

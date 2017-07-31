@@ -4,15 +4,24 @@ using UnityEngine;
 
 public class DamagePacket
 {
-    public int value = 0;
-    public Vector3 direction = Vector3.zero;
-    public AudioClip hitSound = null;
-
-    public void Send(GameObject gobj)
+    public DamagePacket(DamagePacket other)
     {
-        foreach(Health health in gobj.GetComponents<Health>())
+        value = other.value;
+        direction = other.direction;
+        source = other.source;
+    }
+    public DamagePacket() { }
+
+    public int value = 0;
+    public Vector3 direction = Vector2.zero;
+    public Transform source = null;
+
+    public void Send(Transform target, Transform sender)
+    {
+        source = sender;
+        foreach (Health health in target.GetComponents<Health>())
         {
-            health.Damage(this);
+            health.Damage(new DamagePacket(this));
         }
     }
 }

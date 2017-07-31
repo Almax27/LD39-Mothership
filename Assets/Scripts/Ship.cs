@@ -52,9 +52,11 @@ public class Ship : MonoBehaviour {
         Color teamColor = GameManager.GetTeamColor(team);
         foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
         {
-            if(renderer.material)
+            var materials = renderer.materials;
+            if (materials.Length > 0)
             {
-                renderer.material.color = teamColor;
+                var material = materials[materials.Length-1];
+                material.color = teamColor;
             }
         }
         health = maxHealth;

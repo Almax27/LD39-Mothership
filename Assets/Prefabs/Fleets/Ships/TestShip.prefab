@@ -301,7 +301,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: -1
   maxTurnTime: 1
-  maxHealth: 100
+  maxHealth: 10
   health: 0
   weapon: {fileID: 114338672292270390}
 --- !u!114 &114338672292270390
@@ -333,6 +333,7 @@ MonoBehaviour:
   max: 100
   current: 0
   destroyOnDeath: 1
+  powerValue: 10
   spawnOnStart: []
   spawnOnDamage: []
   spawnOnDeath: []

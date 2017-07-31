@@ -146,7 +146,13 @@ MonoBehaviour:
   current: 0
   destroyOnDeath: 1
   spawnOnStart: []
-  spawnOnDamage: []
+  spawnOnDamage:
+  - gameobject: {fileID: 1944457875009338, guid: 2b63cbbfc310f184f801fdef3530335e,
+      type: 2}
+    addAsChild: 0
+    copyPosition: 1
+    copyRotation: 0
+    copyLocalScale: 0
   spawnOnDeath: []
   defaultColor: {r: 0.6655172, g: 0.28676468, b: 1, a: 1}
   flashColor: {r: 1, g: 0.1544118, b: 0.1544118, a: 1}

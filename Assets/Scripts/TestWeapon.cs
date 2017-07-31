@@ -38,7 +38,7 @@ public class TestWeapon : ShipWeapon{
                     DamagePacket packet = new DamagePacket();
                     packet.value = damage;
                     packet.direction = (targetShip.transform.position - transform.position).normalized;
-                    packet.Send(targetShip.gameObject);
+                    packet.Send(targetShip.transform, owningShip.transform);
 
                     Debug.DrawLine(transform.position, targetShip.transform.position, GameManager.GetTeamColor(owningShip.team), 0.2f);
                 }

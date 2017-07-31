@@ -10,6 +10,7 @@ public class Fleet : MonoBehaviour {
     public Ship shipPrefab = null;
     public int startingShipCount = 3;
     public int maxShipCount = 5;
+    public bool canBeMultiSelected = true;
 
     public float maxFormationSpeed = 5;
 
@@ -30,6 +31,8 @@ public class Fleet : MonoBehaviour {
     protected float targetTurnAngle = 0;
 
     protected Fleet targetedFleet = null;
+    protected Fleet defendedFleet = null;
+    protected Vector3 defensivePosition = Vector3.zero;
 
     private void Start()
     {
@@ -76,6 +79,7 @@ public class Fleet : MonoBehaviour {
             Destroy(gameObject);
             return;
         }
+        UpdateDefend();
         UpdateAttack();
         UpdateFormation();
     }
@@ -122,6 +126,14 @@ public class Fleet : MonoBehaviour {
             {
                 activeShips[i].MoveToLocal(Vector3.zero);
             }
+        }
+    }
+
+    void UpdateDefend()
+    {
+        if(defendedFleet)
+        {
+            MoveFleetTo(defendedFleet.transform.position + defensivePosition);
         }
     }
 
@@ -210,6 +222,25 @@ public class Fleet : MonoBehaviour {
     public void AttackOtherFleet(Fleet fleetToAttack)
     {
         targetedFleet = fleetToAttack;
+    }
+
+    public void DefendOtherFleet(Fleet fleetToDefend)
+    {
+        defendedFleet = fleetToDefend;
+        if(defendedFleet)
+        {
+            defensivePosition = Quaternion.Euler(0, Random.Range(0.0f, 360f), 0) * Vector3.forward;
+            if (defendedFleet.selectCircle)
+            {
+                float minRadius = defendedFleet.selectCircle.outerRadius;
+                if (selectCircle) minRadius += selectCircle.outerRadius;
+                defensivePosition *= Random.Range(minRadius, minRadius + 2.0f);
+            }
+            else
+            {
+                defensivePosition *= 4.0f;
+            }
+        }
     }
 
     public Ship GetShipToAttack()

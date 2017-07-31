@@ -108,6 +108,48 @@ NavMeshSettings:
     tileSize: 256
     accuratePlacement: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &41366435
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4565823166734050, guid: 55e2974595f0dc44a95b83eeb0d7dd11, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: -1.95
+      objectReference: {fileID: 0}
+    - target: {fileID: 4565823166734050, guid: 55e2974595f0dc44a95b83eeb0d7dd11, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 4565823166734050, guid: 55e2974595f0dc44a95b83eeb0d7dd11, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 8.185
+      objectReference: {fileID: 0}
+    - target: {fileID: 4565823166734050, guid: 55e2974595f0dc44a95b83eeb0d7dd11, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4565823166734050, guid: 55e2974595f0dc44a95b83eeb0d7dd11, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4565823166734050, guid: 55e2974595f0dc44a95b83eeb0d7dd11, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4565823166734050, guid: 55e2974595f0dc44a95b83eeb0d7dd11, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4565823166734050, guid: 55e2974595f0dc44a95b83eeb0d7dd11, type: 2}
+      propertyPath: m_RootOrder
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 55e2974595f0dc44a95b83eeb0d7dd11, type: 2}
+  m_IsPrefabParent: 0
 --- !u!1 &1284282604
 GameObject:
   m_ObjectHideFlags: 0
@@ -271,6 +313,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &1410517192 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1408973330952066, guid: 55e2974595f0dc44a95b83eeb0d7dd11,
+    type: 2}
+  m_PrefabInternal: {fileID: 41366435}
+--- !u!114 &1410517193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1410517192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0a8b5a5c5a9e9e4ab0e4efdf44df191, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  team: -1
+  maxTurnTime: 3
+  maxHealth: 300
+  health: 0
+  weapon: {fileID: 0}
 --- !u!1001 &1539876843
 Prefab:
   m_ObjectHideFlags: 0

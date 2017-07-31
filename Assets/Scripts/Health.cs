@@ -19,6 +19,7 @@ public class Health : MonoBehaviour
     public int max = 1;
     public int current = 0;
     public bool destroyOnDeath = false;
+    public int powerValue = 10;
 
     [Header("SpawnOnEvent")]
     public SpawnDefinition[] spawnOnStart = new SpawnDefinition[0];
@@ -83,6 +84,11 @@ public class Health : MonoBehaviour
         if (destroyOnDeath)
         {
             Destroy(gameObject);
+        }
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        if (gameManager)
+        {
+            gameManager.SpawnPowerOrbs(powerValue, transform.position, lastDamagePacket.source);
         }
     }
 

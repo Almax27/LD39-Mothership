@@ -35,7 +35,7 @@ public class DamageArea : MonoBehaviour
                     DamagePacket packet = new DamagePacket();
                     packet.value = damage;
                     packet.direction = transform.forward;
-                    packet.Send(collider.gameObject);
+                    packet.Send(collider.transform, this.transform);
                 }
             }
         }
