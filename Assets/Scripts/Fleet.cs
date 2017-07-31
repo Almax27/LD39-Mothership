@@ -376,13 +376,26 @@ public class Fleet : MonoBehaviour {
     {
         if(controlGroup >= 0 && isSelected)
         {
+            Color guiContentColor = GUI.contentColor;
+
             Vector2 screenPos = Camera.main.WorldToScreenPoint(transform.position);
             screenPos.y = Camera.main.pixelHeight - screenPos.y;
-            Vector2 guiPos = GUIUtility.ScreenToGUIPoint(screenPos);
+
             Vector2 size = new Vector2(50, 50);
+            Rect rect = new Rect(GUIUtility.ScreenToGUIPoint(screenPos) - size * 0.5f, size);
+
             GUIStyle style = GUI.skin.label;
+            style.fontSize = 20;
             style.alignment = TextAnchor.MiddleCenter;
-            GUI.Label(new Rect(guiPos - size * 0.5f, size), controlGroup.ToString(), style);
+            GUI.contentColor = Color.black;
+
+            Rect shadowRect = new Rect(rect.position + new Vector2(4, 4), rect.size);
+            GUI.Label(shadowRect, controlGroup.ToString(), style);
+
+            GUI.contentColor = Color.white;
+            GUI.Label(rect, controlGroup.ToString(), style);
+
+            GUI.contentColor = guiContentColor;
         }
     }
 }
