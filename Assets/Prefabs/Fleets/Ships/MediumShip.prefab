@@ -450,7 +450,7 @@ MonoBehaviour:
   isInvulnerable: 0
   max: 200
   current: 1
-  destroyOnDeath: 0
+  destroyOnDeath: 1
   powerValue: 10
   spawnOnStart:
   - gameobject: {fileID: 0}

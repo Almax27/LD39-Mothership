@@ -416,7 +416,7 @@ public class Fleet : MonoBehaviour {
             style.alignment = TextAnchor.MiddleCenter;
             GUI.contentColor = Color.black;
 
-            Rect shadowRect = new Rect(rect.position + new Vector2(4, 4), rect.size);
+            Rect shadowRect = new Rect(rect.position + new Vector2(1, 1), rect.size);
             GUI.Label(shadowRect, controlGroup.ToString(), style);
 
             GUI.contentColor = Color.white;

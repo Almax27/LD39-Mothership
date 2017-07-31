@@ -268,7 +268,7 @@ MonoBehaviour:
   innerRadius: 2.6
   outerRadius: 2.65
   segmentCount: 50
-  uvType: 1
+  uvType: 0
   meshRenderer: {fileID: 23343277894010618}
   meshFilter: {fileID: 33834790176133140}
 --- !u!114 &114407767768868510
@@ -298,6 +298,15 @@ MonoBehaviour:
   engagementRangeCircle: {fileID: 114807252508898362}
   initialPower: 500
   maxPower: 1000
+  lightFleetPrefab: {fileID: 114955272892605798, guid: f50e8796f9ca2094fa21b5e98e90c17f,
+    type: 2}
+  mediumFleetPrefab: {fileID: 114945247166186788, guid: 898f7c66067f59045915d4d8795bc5bc,
+    type: 2}
+  heavyFleetPrefab: {fileID: 114035360293597152, guid: a2fd01050fae4e3488b802ff2af8f2d7,
+    type: 2}
+  spawnOnUnitConstruction:
+  - {fileID: 1767807504113006, guid: 77095f85892c1d044bbfb19c794db901, type: 2}
+  spawnOnUnitConstructionOffset: {x: 0, y: 1.3, z: 0}
   spline: {fileID: 0}
   splineMoveDuration: 0
   lookForward: 0
@@ -316,7 +325,7 @@ MonoBehaviour:
   innerRadius: 2.7
   outerRadius: 2.75
   segmentCount: 50
-  uvType: 1
+  uvType: 0
   meshRenderer: {fileID: 23037418488433086}
   meshFilter: {fileID: 33518418385418358}
 --- !u!114 &114807252508898362
@@ -333,7 +342,7 @@ MonoBehaviour:
   innerRadius: 0.45
   outerRadius: 0.5
   segmentCount: 50
-  uvType: 1
+  uvType: 0
   meshRenderer: {fileID: 23267800584533590}
   meshFilter: {fileID: 33127154466148272}
 --- !u!114 &114877084410844348

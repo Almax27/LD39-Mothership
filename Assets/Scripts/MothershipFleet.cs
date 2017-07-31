@@ -8,6 +8,13 @@ public class MothershipFleet : Fleet {
     public int initialPower = 500;
     public int maxPower = 1000;
 
+    [Header("Fleet Construction")]
+    public Fleet lightFleetPrefab = null;
+    public Fleet mediumFleetPrefab = null;
+    public Fleet heavyFleetPrefab = null;
+    public List<GameObject> spawnOnUnitConstruction = new List<GameObject>();
+    public Vector3 spawnOnUnitConstructionOffset = Vector3.zero;
+
     [Header("Spline movement")]
     public BezierSpline spline;
     public float splineMoveDuration;
@@ -21,6 +28,19 @@ public class MothershipFleet : Fleet {
 
     protected virtual void Update()
     {
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            TrySpawnFleet(lightFleetPrefab);
+        }
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            TrySpawnFleet(mediumFleetPrefab);
+        }
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            TrySpawnFleet(heavyFleetPrefab);
+        }
+
         float newSplineProgress = Mathf.Clamp01(splineProgress + (Time.deltaTime / splineMoveDuration));
         if(spline && newSplineProgress != splineProgress)
         {
@@ -38,7 +58,6 @@ public class MothershipFleet : Fleet {
                 OnReachedEndOfSpline();
             }
         }
-        
     }
 
     // Use this for initialization
@@ -50,6 +69,31 @@ public class MothershipFleet : Fleet {
     void OnReachedEndOfSpline()
     {
 
+    }
+
+    public Fleet TrySpawnFleet(Fleet prefab)
+    {
+        MothershipFleet mothershipFleet = FindObjectOfType<MothershipFleet>();
+        if (prefab && mothershipFleet)
+        {
+            GameObject gobj = Instantiate<GameObject>(prefab.gameObject, mothershipFleet.transform.position, Quaternion.Euler(0, Random.Range(0.0f, 360.0f), 0));
+            if (gobj)
+            {
+                Fleet fleet = gobj.GetComponent<Fleet>();
+                fleet.DefendOtherFleet(mothershipFleet);
+                OnFleetConstructed(fleet);
+                return fleet;
+            }
+        }
+        return null;
+    }
+
+    void OnFleetConstructed(Fleet fleet)
+    {
+        foreach(GameObject gobjToSpawn in spawnOnUnitConstruction)
+        {
+            Instantiate<GameObject>(gobjToSpawn, transform.position + spawnOnUnitConstructionOffset, gobjToSpawn.transform.rotation, transform);
+        }
     }
 
     protected override void OnGUI()

@@ -19,10 +19,6 @@ public class FleetCommander : MonoBehaviour
     public List<Formation> selectionMoveFormations = new List<Formation>();
     public float attackMoveSpreadDegrees = 20.0f;
 
-    public Fleet lightFleetPrefab = null;
-    public Fleet mediumFleetPrefab = null;
-    public Fleet heavyFleetPrefab = null;
-
     void Update()
     {
         ProcessSelection();
@@ -141,18 +137,6 @@ public class FleetCommander : MonoBehaviour
         if (selectedList.Count < 0)
             return;
 
-        if(Input.GetKeyDown(KeyCode.L))
-        {
-            TrySpawnFleet(lightFleetPrefab);
-        }
-        if(Input.GetKeyDown(KeyCode.M))
-        {
-            TrySpawnFleet(mediumFleetPrefab);
-        }
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            TrySpawnFleet(heavyFleetPrefab);
-        }
         if (Input.GetMouseButtonUp(1))
         {
             if (highlightedList.Count == 1)
@@ -246,22 +230,6 @@ public class FleetCommander : MonoBehaviour
                 Select(group);
             }
         }
-    }
-
-    public Fleet TrySpawnFleet(Fleet prefab)
-    {
-        MothershipFleet mothershipFleet = FindObjectOfType<MothershipFleet>();
-        if(prefab && mothershipFleet)
-        {
-            GameObject gobj = Instantiate<GameObject>(prefab.gameObject, mothershipFleet.transform.position, Quaternion.Euler(0, Random.Range(0.0f,360.0f), 0));
-            if(gobj)
-            {
-                Fleet fleet = gobj.GetComponent<Fleet>();
-                fleet.DefendOtherFleet(mothershipFleet);
-                return fleet;
-            }
-        }
-        return null;
     }
 
     public bool CanSelect(Fleet selectable)
