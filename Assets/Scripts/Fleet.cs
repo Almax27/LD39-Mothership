@@ -77,6 +77,8 @@ public class Fleet : MonoBehaviour {
 
         OnUnhighted();
         OnDeselected();
+
+        lastAttackRefreshTime = Time.time;
     }
 
     protected virtual void LateUpdate()
@@ -95,8 +97,8 @@ public class Fleet : MonoBehaviour {
             Destroy(gameObject);
             return;
         }
-        UpdateAttack();
         UpdateDefend();
+        UpdateAttack();
         UpdateFormation();
     }
 
@@ -183,12 +185,13 @@ public class Fleet : MonoBehaviour {
                 }
             }
         }
-        if (!isAttacking || Time.time > lastAttackRefreshTime + attackRefreshRate)
+        bool shouldRefreshAttack = Time.time > lastAttackRefreshTime + attackRefreshRate;
+        if (!isAttacking || shouldRefreshAttack)
         {
             lastAttackRefreshTime = Time.time;
             isAttacking = willAttackWhenIdle && !isMoving && !isTurning;
             isAttacking |= willAttackWhenDefending && defendedFleet && Vector3.Distance(defendedFleet.transform.position + defensivePosition, transform.position) < engagementRange;
-            if (isAttacking && !targetedFleet)
+            if ((isAttacking && !targetedFleet) || shouldRefreshAttack)
             {
                 //search for nearby enemy fleets
                 float minDistSq = engagementRange * engagementRange;

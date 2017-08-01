@@ -31,6 +31,24 @@ public class Projectile : MonoBehaviour {
         damageOnHit = damage;
         currentDirection = initialDirection;
         transform.SetPositionAndRotation(initialPosition, Quaternion.LookRotation(initialDirection));
+
+        int team = 0;
+        if (source)
+        {
+            Ship ship = source.GetComponent<Ship>();
+            if(ship)
+            {
+                team = ship.team;
+            }
+        }
+        Color teamColor = GameManager.GetTeamColor(team);
+        foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
+        {
+            foreach(Material mat in renderer.materials)
+            {
+                mat.color = teamColor;
+            }
+        }
     }
 
     private void Update()
