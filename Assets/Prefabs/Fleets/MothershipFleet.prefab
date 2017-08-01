@@ -291,7 +291,10 @@ MonoBehaviour:
   maxShipCount: 1
   canBeMultiSelected: 0
   canBeAddedToControlGroups: 0
+  willAttackWhenIdle: 1
+  willAttackWhenDefending: 1
   maxFormationSpeed: 2
+  attackRange: 10
   engagementRange: 0
   selectCircle: {fileID: 114269506766830584}
   highlightCircle: {fileID: 114744377142332350}
@@ -357,6 +360,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spline: {fileID: 0}
-  duration: 600
+  duration: 450
   lookForward: 1
   mode: 0
