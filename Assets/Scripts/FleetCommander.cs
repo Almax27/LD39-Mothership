@@ -19,6 +19,9 @@ public class FleetCommander : MonoBehaviour
     public List<Formation> selectionMoveFormations = new List<Formation>();
     public float attackMoveSpreadDegrees = 20.0f;
 
+    [Header("Sounds")]
+    public AudioClip selectAudio = null;
+
     void Update()
     {
         ProcessSelection();
@@ -92,15 +95,7 @@ public class FleetCommander : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
             //perform selection
-            foreach (var selectable in highlightedList)
-            {
-                if (CanSelect(selectable))
-                {
-                    selectable.SetIsHighlighted(false);
-                    selectable.SetIsSelected(true);
-                    selectedList.Add(selectable);
-                } 
-            }
+            Select(highlightedList);
             highlightedList.Clear();
 
             { //log selection information
@@ -236,7 +231,7 @@ public class FleetCommander : MonoBehaviour
 
     public bool CanSelect(Fleet selectable)
     {
-        bool canSelect = teamToSelect < 0 || selectable.team == teamToSelect;
+        bool canSelect = selectable && (teamToSelect < 0 || selectable.team == teamToSelect);
         return canSelect;
     }
 
@@ -313,18 +308,14 @@ public class FleetCommander : MonoBehaviour
 
     public void Select(Fleet selectable)
     {
-        //remove from list first to avoid diselecting unnecessarily
-        selectedList.Remove(selectable);
-        DeselectAll();
-        if (selectable)
-        {
-            selectable.SetIsSelected(true);
-            selectedList.Add(selectable);
-        }
+        List<Fleet> selectableList = new List<Fleet>();
+        selectableList.Add(selectable);
+        Select(selectableList);
     }
 
     public void Select(List<Fleet> selectableList)
     {
+        bool didSelect = false;
         if (selectableList != null)
         {
             //remove from list first to avoid diselecting unnecessarily
@@ -332,12 +323,22 @@ public class FleetCommander : MonoBehaviour
             DeselectAll();
             foreach (Fleet selectable in selectableList)
             {
-                if (selectable)
+                if (CanSelect(selectable))
                 {
                     selectable.SetIsSelected(true);
+                    selectable.SetIsHighlighted(false);
                     selectedList.Add(selectable);
+                    didSelect = true;
+                }
+                else if(selectable)
+                {
+                    selectable.SetIsSelected(false);
                 }
             }
+        }
+        if(didSelect)
+        {
+            FAFAudio.Instance.PlayOnce2D(selectAudio, transform.position);
         }
     }
 

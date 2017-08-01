@@ -26,6 +26,9 @@ public class MothershipFleet : Fleet {
     int currentPower = 0;
     float splineProgress = 0;
 
+    //property accessors
+    public float CurrentPower { get { return currentPower; } }
+
     protected virtual void Update()
     {
         if (Input.GetKeyDown(KeyCode.L))

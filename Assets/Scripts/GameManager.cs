@@ -1,11 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
 
     public int maxPowerPerOrb = 10;
     public PowerOrb powerOrbPrefab = null;
+    public AudioClip music = null;
+
+    [Header("HUD")]
+    public GameObject helpContent = null;
+    public Image powerBar = null;
+    public Text powerText = null;
 
     static public Color GetTeamColor(int team)
     {
@@ -55,10 +62,26 @@ public class GameManager : MonoBehaviour {
         {
             Debug.LogWarning("Missing power orb prefab");
         }
+        FAFAudio.Instance.PlayMusic(music);
     }
 	
 	// Update is called once per frame
 	void Update () {
-		
-	}
+        if (helpContent)
+        {
+            helpContent.SetActive(Input.GetKey(KeyCode.P));
+        }
+        MothershipFleet mothershipFleet = FindObjectOfType<MothershipFleet>();
+        if (mothershipFleet)
+        {
+            if (powerBar)
+            {
+                powerBar.fillAmount = mothershipFleet.maxPower > 0 ? mothershipFleet.CurrentPower / mothershipFleet.maxPower : 0;
+            }
+            if(powerText)
+            {
+                powerText.text = mothershipFleet.CurrentPower.ToString();
+            }
+        }
+    }
 }
