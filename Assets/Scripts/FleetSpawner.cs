@@ -18,6 +18,8 @@ public class FleetSpawner : MonoBehaviour {
     public float spawnRadius = 5;
     public SpawnFacing spawnFacing = SpawnFacing.Random;
     public bool autoTargetMothership = false;
+    [Tooltip("Override chase range of spawned fleets, negative numbers are ignored")]
+    public float chaseOverride = -1.0f;
 
     public float firstSpawnDelay = 0;
     public float spawnInterval = 10;
@@ -81,7 +83,7 @@ public class FleetSpawner : MonoBehaviour {
             Fleet fleet = gobj.GetComponent<Fleet>();
             fleet.team = team;
 
-            if(autoTargetMothership)
+            if (autoTargetMothership)
             {
                 MothershipFleet mothershipFleet = FindObjectOfType<MothershipFleet>();
                 if(mothershipFleet)
@@ -89,6 +91,11 @@ public class FleetSpawner : MonoBehaviour {
                     fleet.AttackOtherFleet(mothershipFleet);
                     fleet.chaseRange = float.MaxValue;
                 }
+            }
+
+            if (chaseOverride >= 0)
+            {
+                fleet.chaseRange = chaseOverride;
             }
         }
     }
