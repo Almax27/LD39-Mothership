@@ -171,6 +171,11 @@ Prefab:
       propertyPath: spawnCountPerInterval
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 114529708202936458, guid: 6530c356980b3dd4bbc231149e9dc387,
+        type: 2}
+      propertyPath: autoTargetMothership
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 6530c356980b3dd4bbc231149e9dc387, type: 2}
   m_IsPrefabParent: 0
@@ -299,6 +304,11 @@ Prefab:
       propertyPath: spawnCountPerInterval
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 114529708202936458, guid: 6530c356980b3dd4bbc231149e9dc387,
+        type: 2}
+      propertyPath: autoTargetMothership
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 6530c356980b3dd4bbc231149e9dc387, type: 2}
   m_IsPrefabParent: 0
@@ -370,6 +380,11 @@ Prefab:
       propertyPath: fleetCountPerInterval
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 114529708202936458, guid: 6530c356980b3dd4bbc231149e9dc387,
+        type: 2}
+      propertyPath: autoTargetMothership
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 6530c356980b3dd4bbc231149e9dc387, type: 2}
   m_IsPrefabParent: 0
@@ -411,6 +426,11 @@ Prefab:
     - target: {fileID: 4776839035890096, guid: 6530c356980b3dd4bbc231149e9dc387, type: 2}
       propertyPath: m_RootOrder
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114529708202936458, guid: 6530c356980b3dd4bbc231149e9dc387,
+        type: 2}
+      propertyPath: autoTargetMothership
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 6530c356980b3dd4bbc231149e9dc387, type: 2}

@@ -17,6 +17,7 @@ public class FleetSpawner : MonoBehaviour {
     public int team = 1;
     public float spawnRadius = 5;
     public SpawnFacing spawnFacing = SpawnFacing.Random;
+    public bool autoTargetMothership = false;
 
     public float firstSpawnDelay = 0;
     public float spawnInterval = 10;
@@ -59,7 +60,7 @@ public class FleetSpawner : MonoBehaviour {
         }
         for(int i = 0; i < fleetCountPerInterval; i++)
         {
-            Vector3 position = Random.insideUnitSphere * spawnRadius;
+            Vector3 position = transform.position + Random.insideUnitSphere * spawnRadius;
             position.y = 0;
 
             Quaternion rotation = new Quaternion();
@@ -79,6 +80,16 @@ public class FleetSpawner : MonoBehaviour {
             GameObject gobj = Instantiate<GameObject>(fleetPrefab.gameObject, position, rotation);
             Fleet fleet = gobj.GetComponent<Fleet>();
             fleet.team = team;
+
+            if(autoTargetMothership)
+            {
+                MothershipFleet mothershipFleet = FindObjectOfType<MothershipFleet>();
+                if(mothershipFleet)
+                {
+                    fleet.AttackOtherFleet(mothershipFleet);
+                    fleet.chaseRange = float.MaxValue;
+                }
+            }
         }
     }
 

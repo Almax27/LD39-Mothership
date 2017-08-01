@@ -21,6 +21,8 @@ public class Fleet : MonoBehaviour {
 
     public float attackRange = 10;
     public float engagementRange = 10;
+    public float chaseRange = 5;
+    public float attackRefreshRate = 5.0f;
 
     public CircleMeshGenerator selectCircle = null;
     public CircleMeshGenerator highlightCircle = null;
@@ -32,14 +34,18 @@ public class Fleet : MonoBehaviour {
     protected bool formationDirty = true;
     protected bool isMoving = false;
     protected bool isTurning = false;
+    protected bool isChasing = false;
+    protected bool isAttacking = false;
     protected ShipFormation currentFormation = null;
     protected Vector3 targetMovePosition = Vector3.zero;
     protected Vector3 moveVelocity = Vector3.zero;
     protected float targetTurnAngle = 0;
 
     protected Fleet targetedFleet = null;
+    protected Vector3 chaseStart = Vector3.zero;
     protected Fleet defendedFleet = null;
     protected Vector3 defensivePosition = Vector3.zero;
+    protected float lastAttackRefreshTime = 0;
 
     public int ControlGroup { get { return controlGroup; } set { controlGroup = value; } }
     protected int controlGroup = -1;
@@ -89,8 +95,8 @@ public class Fleet : MonoBehaviour {
             Destroy(gameObject);
             return;
         }
-        UpdateDefend();
         UpdateAttack();
+        UpdateDefend();
         UpdateFormation();
     }
 
@@ -141,7 +147,7 @@ public class Fleet : MonoBehaviour {
 
     void UpdateDefend()
     {
-        if(defendedFleet)
+        if(defendedFleet && !isAttacking)
         {
             MoveFleetTo(defendedFleet.transform.position + defensivePosition);
         }
@@ -149,37 +155,44 @@ public class Fleet : MonoBehaviour {
 
     void UpdateAttack()
     {
-        bool isAttacking = false;
-        if(targetedFleet && !isMoving && !isTurning)
+        isAttacking = false;
+        if (targetedFleet)
         {
-            Vector3 attackVector = targetedFleet.transform.position - transform.position;
-            if (attackVector.sqrMagnitude <= (attackRange * attackRange) + 0.1f)
+            if (!isMoving && !isTurning)
             {
-                isAttacking = true;
-                //aim once we've stopped moving
-                if (!isMoving)
+                Vector3 attackVector = targetedFleet.transform.position - transform.position;
+                Vector3 chaseVector = transform.position - chaseStart;
+                if (attackVector.sqrMagnitude <= (attackRange * attackRange) + 0.1f)
                 {
-                    targetTurnAngle = Quaternion.LookRotation(targetedFleet.transform.position - transform.position).eulerAngles.y;
+                    isAttacking = true;
+                    //aim once we've stopped moving
+                    if (!isMoving)
+                    {
+                        targetTurnAngle = Quaternion.LookRotation(targetedFleet.transform.position - transform.position).eulerAngles.y;
+                    }
                 }
-                foreach (Ship ship in activeShips)
+                else if (chaseVector.sqrMagnitude < chaseRange * chaseRange)
                 {
-                    ship.AttackFleet(targetedFleet);
+                    Quaternion chaseRotation = Quaternion.Euler(0, Random.Range(-30, 30), 0);
+                    MoveFleetTo(targetedFleet.transform.position - chaseRotation * attackVector.normalized * engagementRange);
+                }
+                else if(isChasing)
+                {
+                    MoveFleetTo(chaseStart);
+                    AttackOtherFleet(null);
                 }
             }
         }
-        if(!isAttacking)
+        if (!isAttacking || Time.time > lastAttackRefreshTime + attackRefreshRate)
         {
-            foreach (Ship ship in activeShips)
-            {
-                ship.AttackFleet(null);
-            }
-
-            bool canAttack = willAttackWhenIdle && !isMoving && !isTurning;
-            canAttack |= willAttackWhenDefending && defendedFleet;
-            if (canAttack && !targetedFleet)
+            lastAttackRefreshTime = Time.time;
+            isAttacking = willAttackWhenIdle && !isMoving && !isTurning;
+            isAttacking |= willAttackWhenDefending && defendedFleet && Vector3.Distance(defendedFleet.transform.position + defensivePosition, transform.position) < engagementRange;
+            if (isAttacking && !targetedFleet)
             {
                 //search for nearby enemy fleets
                 float minDistSq = engagementRange * engagementRange;
+                Fleet closestFleet = null;
                 foreach (Fleet fleet in FindObjectsOfType<Fleet>())
                 {
                     if (fleet.team != this.team)
@@ -187,11 +200,30 @@ public class Fleet : MonoBehaviour {
                         float distSq = (fleet.transform.position - this.transform.position).sqrMagnitude;
                         if (distSq < minDistSq)
                         {
-                            targetedFleet = fleet;
                             minDistSq = distSq;
+                            closestFleet = fleet;
                         }
                     }
                 }
+                if (closestFleet)
+                {
+                    AttackOtherFleet(closestFleet, true);
+                }
+            }
+        }
+
+        if (isAttacking)
+        {
+            foreach (Ship ship in activeShips)
+            {
+                ship.AttackFleet(targetedFleet);
+            }
+        }
+        else
+        {
+            foreach (Ship ship in activeShips)
+            {
+                ship.AttackFleet(null);
             }
         }
     }
@@ -249,9 +281,11 @@ public class Fleet : MonoBehaviour {
         isMoving = false;
     }
 
-    public void AttackOtherFleet(Fleet fleetToAttack)
+    public void AttackOtherFleet(Fleet fleetToAttack, bool chase = true)
     {
         targetedFleet = fleetToAttack;
+        chaseStart = transform.position;
+        isChasing = chase;
     }
 
     public void DefendOtherFleet(Fleet fleetToDefend)

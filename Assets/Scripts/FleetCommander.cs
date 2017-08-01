@@ -134,7 +134,7 @@ public class FleetCommander : MonoBehaviour
 
     void ProcessActions()
     {
-        if (selectedList.Count < 0)
+        if (selectedList.Count <= 0)
             return;
 
         if (Input.GetMouseButtonUp(1))
@@ -162,13 +162,15 @@ public class FleetCommander : MonoBehaviour
 
                         //attack
                         selectable.AttackOtherFleet(highlighted);
+                        //cancel defend
+                        selectable.DefendOtherFleet(null);
                     }
                 }
                 else
                 {
                     for (int i = 0; i < selectedList.Count; i++)
                     {
-                        //follow
+                        //defend
                         Fleet selectable = selectedList[i];
                         selectable.DefendOtherFleet(highlighted);
                     }
