@@ -15,6 +15,20 @@ public class Ship : MonoBehaviour {
     float targetFacingAngle = 0;
 
     Fleet targetFleet = null;
+    Health health = null;
+
+    //properties
+    public Health Health
+    {
+        get
+        {
+            if(health == null)
+            {
+                health = GetComponent<Health>();
+            }
+            return health;
+        }
+    }
 
     public void MoveToLocal(Vector3 position)
     {
@@ -40,7 +54,7 @@ public class Ship : MonoBehaviour {
     public void AttackFleet(Fleet fleetToAttack)
     {
         targetFleet = fleetToAttack;
-        if (weapon)
+        if (weapon != null)
         {
             weapon.AttackFleet(this, targetFleet);
         }
@@ -48,6 +62,8 @@ public class Ship : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        health = GetComponent<Health>();
+
         Color teamColor = GameManager.GetTeamColor(team);
         foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
         {
@@ -65,15 +81,18 @@ public class Ship : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-        if (maxTurnTime > 0)
+        if(currentFacingAngle != targetFacingAngle)
         {
-            currentFacingAngle = Mathf.MoveTowardsAngle(currentFacingAngle, targetFacingAngle, (360.0f * Time.deltaTime) / maxTurnTime);
+            if (maxTurnTime > 0)
+            {
+                currentFacingAngle = Mathf.MoveTowardsAngle(currentFacingAngle, targetFacingAngle, (360.0f * Time.deltaTime) / maxTurnTime);
+            }
+            else
+            {
+                currentFacingAngle = targetFacingAngle;
+            }
+            transform.rotation = Quaternion.Euler(0, currentFacingAngle, 0);
         }
-        else
-        {
-            currentFacingAngle = targetFacingAngle;
-        }
-        transform.rotation = Quaternion.Euler(0, currentFacingAngle, 0);
 	}
 
     void OnDeath()

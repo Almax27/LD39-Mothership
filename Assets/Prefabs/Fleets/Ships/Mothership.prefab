@@ -248,8 +248,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: -1
   maxTurnTime: 1
-  maxHealth: 100
-  health: 0
+  powerValue: 10
   weapon: {fileID: 0}
   powerToMove: 1
   movementSpeed: 2

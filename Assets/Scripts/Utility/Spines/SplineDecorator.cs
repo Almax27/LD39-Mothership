@@ -52,4 +52,18 @@ public class SplineDecorator : MonoBehaviour {
             distance += decorationStep;
         }
     }
+
+    private void OnDrawGizmos()
+    {
+        float distance = decorationStep;
+        while (distance < spline.Length)
+        {
+            Vector3 position = spline.GetPoint(distance / spline.Length);
+
+            Gizmos.color = Color.white;
+            Gizmos.DrawWireSphere(position, 0.5f);
+
+            distance += decorationStep;
+        }
+    }
 }

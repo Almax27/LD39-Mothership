@@ -7,6 +7,7 @@ public class MothershipFleet : Fleet {
     [Header("Power Configuration")]
     public int initialPower = 500;
     public int maxPower = 1000;
+    public int powerRequiredForJourney = 1000;
 
     [Header("Fleet Construction")]
     public Fleet lightFleetPrefab = null;
@@ -25,40 +26,53 @@ public class MothershipFleet : Fleet {
     //Transient state
     int currentPower = 0;
     float splineProgress = 0;
+    float powerLossAccumulator = 0;
 
     //property accessors
-    public float CurrentPower { get { return currentPower; } }
+    public int CurrentPower { get { return currentPower; } set { currentPower = Mathf.Min(value, maxPower); } }
+    public float SplineProgress { get { return splineProgress; } }
 
     protected virtual void Update()
     {
-        if (Input.GetKeyDown(KeyCode.L))
+        powerLossAccumulator += powerRequiredForJourney * (Time.deltaTime / splineMoveDuration);
+        if(powerLossAccumulator >= 1)
         {
-            TrySpawnFleet(lightFleetPrefab);
-        }
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            TrySpawnFleet(mediumFleetPrefab);
-        }
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            TrySpawnFleet(heavyFleetPrefab);
+            int loss = Mathf.Min(currentPower, Mathf.FloorToInt(powerLossAccumulator));
+            currentPower -= loss;
+            powerLossAccumulator -= loss;
         }
 
-        float newSplineProgress = Mathf.Clamp01(splineProgress + (Time.deltaTime / splineMoveDuration));
-        if(spline && newSplineProgress != splineProgress)
+        if (currentPower > 0)
         {
-            splineProgress = newSplineProgress;
-
-            Vector3 position = spline.GetPoint(splineProgress);
-            transform.localPosition = position;
-            if (lookForward)
+            if (Input.GetKeyDown(KeyCode.L))
             {
-                transform.LookAt(position + spline.GetDirection(splineProgress));
+                TrySpawnFleet(lightFleetPrefab);
+            }
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                TrySpawnFleet(mediumFleetPrefab);
+            }
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                TrySpawnFleet(heavyFleetPrefab);
             }
 
-            if(splineProgress >= 1.0f)
+            float newSplineProgress = Mathf.Clamp01(splineProgress + (Time.deltaTime / splineMoveDuration));
+            if (spline && newSplineProgress != splineProgress)
             {
-                OnReachedEndOfSpline();
+                splineProgress = newSplineProgress;
+
+                Vector3 position = spline.GetPoint(splineProgress);
+                transform.localPosition = position;
+                if (lookForward)
+                {
+                    transform.LookAt(position + spline.GetDirection(splineProgress));
+                }
+
+                if (splineProgress >= 1.0f)
+                {
+                    OnReachedEndOfSpline();
+                }
             }
         }
     }
@@ -79,13 +93,18 @@ public class MothershipFleet : Fleet {
         MothershipFleet mothershipFleet = FindObjectOfType<MothershipFleet>();
         if (prefab && mothershipFleet)
         {
-            GameObject gobj = Instantiate<GameObject>(prefab.gameObject, mothershipFleet.transform.position, Quaternion.Euler(0, Random.Range(0.0f, 360.0f), 0));
-            if (gobj)
+            if (currentPower >= prefab.powerCostToSpawn)
             {
-                Fleet fleet = gobj.GetComponent<Fleet>();
-                fleet.DefendOtherFleet(mothershipFleet);
-                OnFleetConstructed(fleet);
-                return fleet;
+                GameObject gobj = Instantiate<GameObject>(prefab.gameObject, mothershipFleet.transform.position, Quaternion.Euler(0, Random.Range(0.0f, 360.0f), 0));
+                if (gobj)
+                {
+                    currentPower -= prefab.powerCostToSpawn;
+
+                    Fleet fleet = gobj.GetComponent<Fleet>();
+                    fleet.DefendOtherFleet(mothershipFleet);
+                    OnFleetConstructed(fleet);
+                    return fleet;
+                }
             }
         }
         return null;
@@ -97,10 +116,5 @@ public class MothershipFleet : Fleet {
         {
             Instantiate<GameObject>(gobjToSpawn, transform.position + spawnOnUnitConstructionOffset, gobjToSpawn.transform.rotation, transform);
         }
-    }
-
-    protected override void OnGUI()
-    {
-        base.OnGUI();   
     }
 }

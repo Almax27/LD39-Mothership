@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
 
@@ -13,6 +14,10 @@ public class GameManager : MonoBehaviour {
     public GameObject helpContent = null;
     public Image powerBar = null;
     public Text powerText = null;
+    public GameObject winContent = null;
+    public GameObject loseContent = null;
+
+    MothershipFleet mothershipFleet = null;
 
     static public Color GetTeamColor(int team)
     {
@@ -67,21 +72,51 @@ public class GameManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (helpContent)
+        bool isPaused = false;
+
+        if (mothershipFleet == null)
         {
-            helpContent.SetActive(Input.GetKey(KeyCode.P));
+            mothershipFleet = FindObjectOfType<MothershipFleet>();
         }
-        MothershipFleet mothershipFleet = FindObjectOfType<MothershipFleet>();
-        if (mothershipFleet)
+        if (mothershipFleet != null)
         {
             if (powerBar)
             {
-                powerBar.fillAmount = mothershipFleet.maxPower > 0 ? mothershipFleet.CurrentPower / mothershipFleet.maxPower : 0;
+                powerBar.fillAmount = mothershipFleet.maxPower > 0 ? (float)mothershipFleet.CurrentPower / mothershipFleet.maxPower : 0;
             }
             if(powerText)
             {
                 powerText.text = mothershipFleet.CurrentPower.ToString();
             }
+
+            bool isWinner = mothershipFleet.SplineProgress >= 1.0f;
+            bool isLoser = mothershipFleet.CurrentPower <= 0;
+            if (isWinner && winContent)
+            {
+                winContent.SetActive(isWinner);
+            }
+            else if (isLoser && loseContent)
+            {
+                loseContent.SetActive(isLoser);
+            }
+            if (isWinner || isLoser)
+            {
+                if(Input.anyKeyDown)
+                {
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                }
+                else
+                {
+                    isPaused = true;
+                }
+            }
         }
+
+        if (!isPaused && helpContent)
+        {
+            isPaused = Input.GetKey(KeyCode.P);
+            helpContent.SetActive(isPaused);
+        }
+        Time.timeScale = isPaused ? 0 : 1;
     }
 }

@@ -20,7 +20,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4241884746311910}
   - component: {fileID: 114407767768868510}
-  - component: {fileID: 114877084410844348}
   m_Layer: 0
   m_Name: MothershipFleet
   m_TagString: Untagged
@@ -284,6 +283,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: 0
   powerCostToSpawn: 100
+  powerGainedWhenMaxShipCountKilled: 200
   fleetFormationPrefab: {fileID: 0}
   shipPrefab: {fileID: 114468535184008744, guid: a5ce7d2af51050e40a90033df8dfa8d7,
     type: 2}
@@ -291,16 +291,21 @@ MonoBehaviour:
   maxShipCount: 1
   canBeMultiSelected: 0
   canBeAddedToControlGroups: 0
-  willAttackWhenIdle: 1
-  willAttackWhenDefending: 1
-  maxFormationSpeed: 2
+  canBeCommanded: 0
+  canAttackFromIdle: 1
+  canAttackFromDefending: 1
+  canAttackWhileMoving: 0
+  maxFormationSpeed: 0
   attackRange: 10
   engagementRange: 0
+  chaseRange: 5
+  attackRefreshRate: 5
   selectCircle: {fileID: 114269506766830584}
   highlightCircle: {fileID: 114744377142332350}
   engagementRangeCircle: {fileID: 114807252508898362}
-  initialPower: 500
-  maxPower: 1000
+  initialPower: 2500
+  maxPower: 5000
+  powerRequiredForJourney: 5000
   lightFleetPrefab: {fileID: 114955272892605798, guid: f50e8796f9ca2094fa21b5e98e90c17f,
     type: 2}
   mediumFleetPrefab: {fileID: 114945247166186788, guid: 898f7c66067f59045915d4d8795bc5bc,
@@ -311,8 +316,8 @@ MonoBehaviour:
   - {fileID: 1767807504113006, guid: 77095f85892c1d044bbfb19c794db901, type: 2}
   spawnOnUnitConstructionOffset: {x: 0, y: 1.3, z: 0}
   spline: {fileID: 0}
-  splineMoveDuration: 0
-  lookForward: 0
+  splineMoveDuration: 450
+  lookForward: 1
   mode: 0
 --- !u!114 &114744377142332350
 MonoBehaviour:
@@ -348,18 +353,3 @@ MonoBehaviour:
   uvType: 0
   meshRenderer: {fileID: 23267800584533590}
   meshFilter: {fileID: 33127154466148272}
---- !u!114 &114877084410844348
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1046760146633856}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 541a76f9c03874323b5154b14ac00427, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spline: {fileID: 0}
-  duration: 450
-  lookForward: 1
-  mode: 0

@@ -4,9 +4,30 @@ using UnityEngine;
 
 public class Fleet : MonoBehaviour {
 
+    public static List<Fleet> g_allFleets = new List<Fleet>();
+
+#if UNITY_EDITOR
+    [UnityEditor.Callbacks.DidReloadScripts]
+    private static void OnScriptsReloaded()
+    {
+        // do something
+        g_allFleets.Clear();
+        g_allFleets.AddRange(FindObjectsOfType<Fleet>());
+    }
+#endif
+
+    public enum FleetState
+    {
+        Idle,
+        Moving,
+        Defending,
+        Attacking
+    }
+
     [Header("Fleet Configuration")]
     public int team = -1;
     public int powerCostToSpawn = 100;
+    public int powerGainedWhenMaxShipCountKilled = 200;
 
     public FleetShipFormations fleetFormationPrefab = null;
     public Ship shipPrefab = null;
@@ -14,8 +35,10 @@ public class Fleet : MonoBehaviour {
     public int maxShipCount = 5;
     public bool canBeMultiSelected = true;
     public bool canBeAddedToControlGroups = true;
-    public bool willAttackWhenIdle = true;
-    public bool willAttackWhenDefending = true;
+    public bool canBeCommanded = true;
+    public bool canAttackFromIdle = true;
+    public bool canAttackFromDefending = true;
+    public bool canAttackWhileMoving = false;
 
     public float maxFormationSpeed = 5;
 
@@ -28,21 +51,24 @@ public class Fleet : MonoBehaviour {
     public CircleMeshGenerator highlightCircle = null;
     public CircleMeshGenerator engagementRangeCircle = null;
 
-    [Header("Fleet State")]
+    protected FleetState currentState;
+
     protected List<Ship> activeShips = new List<Ship>();
 
-    protected bool formationDirty = true;
+    protected bool isAttacking = false;
+    protected bool isAutoAttacking = false;
     protected bool isMoving = false;
     protected bool isTurning = false;
-    protected bool isChasing = false;
-    protected bool isAttacking = false;
+    
     protected ShipFormation currentFormation = null;
     protected Vector3 targetMovePosition = Vector3.zero;
+    protected Vector3 idlePosition = Vector3.zero;
     protected Vector3 moveVelocity = Vector3.zero;
     protected float targetTurnAngle = 0;
 
     protected Fleet targetedFleet = null;
     protected Vector3 chaseStart = Vector3.zero;
+    protected Vector3 chaseOffset = Vector3.zero;
     protected Fleet defendedFleet = null;
     protected Vector3 defensivePosition = Vector3.zero;
     protected float lastAttackRefreshTime = 0;
@@ -50,9 +76,21 @@ public class Fleet : MonoBehaviour {
     public int ControlGroup { get { return controlGroup; } set { controlGroup = value; } }
     protected int controlGroup = -1;
 
+    protected void Awake()
+    {
+        g_allFleets.Add(this);
+        g_allFleets.RemoveAll(f => f == null);
+    }
+
+    protected void OnDestroy()
+    {
+        g_allFleets.Remove(this);
+        g_allFleets.RemoveAll(f => f == null);
+    }
+
     protected virtual void Start()
     {
-        if(fleetFormationPrefab && fleetFormationPrefab.GetMaxSupportedShips() < maxShipCount)
+        if (fleetFormationPrefab && fleetFormationPrefab.GetMaxSupportedShips() < maxShipCount)
         {
             Debug.LogWarningFormat("{0} does not support {1} ships", fleetFormationPrefab.name, maxShipCount);
         }
@@ -62,6 +100,18 @@ public class Fleet : MonoBehaviour {
         for (int i = 0; i < startingShipCount; i++)
         {
             Reinforce();
+        }
+
+        if (fleetFormationPrefab != null)
+        {
+            currentFormation = fleetFormationPrefab.GetBestShipFormation(activeShips.Count);
+            if (currentFormation != null)
+            {
+                for (int i = 0; i < activeShips.Count; i++)
+                {
+                    activeShips[i].MoveToLocal(currentFormation.GetPositionAt(i));
+                }
+            }
         }
 
         //resize engagementCircle
@@ -78,155 +128,209 @@ public class Fleet : MonoBehaviour {
         OnUnhighted();
         OnDeselected();
 
-        lastAttackRefreshTime = Time.time;
+        lastAttackRefreshTime = Time.time + Random.Range(0, attackRefreshRate);
     }
 
     protected virtual void LateUpdate()
     {
-        activeShips.RemoveAll(delegate (Ship ship) 
-        {
-            if (ship == null)
-            {
-                formationDirty = true;
-                return true;
-            }
-            return false;
-        });
+        activeShips.RemoveAll(s => s== null);
         if(activeShips.Count == 0)
         {
             Destroy(gameObject);
             return;
         }
-        UpdateDefend();
-        UpdateAttack();
+        UpdateState();
         UpdateFormation();
+        UpdateHealthCache();
+    }
+
+    void UpdateState()
+    {
+        bool canUpdateTarget = false;
+        isAttacking = false;
+        isMoving = false;
+
+        switch (currentState)
+        {
+            case FleetState.Idle:
+                canUpdateTarget = canAttackFromIdle;
+                if (defendedFleet)
+                    SetState(FleetState.Defending);
+                break;
+            case FleetState.Moving:
+                canUpdateTarget = canAttackWhileMoving;
+                if ((transform.position - targetMovePosition).sqrMagnitude > 0.1f)
+                {
+                    isMoving = true;
+                }
+                else
+                {
+                    //reached our destination
+                    SetState(FleetState.Idle);
+                }
+                break;
+            case FleetState.Defending:
+                canUpdateTarget = canAttackFromDefending;
+                if (defendedFleet)
+                {
+                    targetMovePosition = defendedFleet.transform.position + defensivePosition;
+                    isMoving = true;
+                }
+                else
+                {
+                    SetState(FleetState.Idle);
+                }
+                break;
+            case FleetState.Attacking:
+                if (targetedFleet)
+                {
+                    Vector3 attackVector = targetedFleet.transform.position - transform.position;
+                    Vector3 chaseVector = transform.position - chaseStart;
+                    canUpdateTarget = true;
+                    if (attackVector.sqrMagnitude < ((attackRange+0.5f) * (attackRange+0.5f)))
+                    {
+                        //in range
+                        isAttacking = !isTurning;
+                    }
+                    //handle chasing after target, always chase if not an auto attack
+                    else if (!isAutoAttacking || chaseVector.sqrMagnitude < chaseRange * chaseRange)
+                    {
+                        //in chase range
+                        isMoving = true;
+                        targetMovePosition = targetedFleet.transform.position + chaseOffset;
+                    }
+                    else if (isAutoAttacking)
+                    {
+                        //out of range
+                        targetedFleet = null;
+                        MoveFleetTo(chaseStart);
+                    }
+                }
+                else
+                {
+                    //no target
+                    SetState(FleetState.Idle);
+                }
+                break;
+        }
+
+        if (canUpdateTarget)
+        {
+            UpdateTarget();
+        }
+        Fleet fleetToAttack = isAttacking ? targetedFleet : null;
+        for(int i = 0; i < activeShips.Count; i++)
+        {
+            activeShips[i].AttackFleet(fleetToAttack);
+        }
+    }
+
+    private void UpdateHealthCache()
+    {
+        cachedHealth = 0;
+        cachedMaxHealth = 0;
+        if(shipPrefab && shipPrefab.Health)
+        {
+            cachedMaxHealth = shipPrefab.Health.max * maxShipCount;
+        }
+        for (int i = 0; i < activeShips.Count; i++)
+        {
+            Ship ship = activeShips[i];
+            if (ship.Health != null)
+            {
+                cachedHealth += ship.Health.current;
+            }
+        }
+    } 
+
+    void SetState(FleetState newState)
+    {
+        switch (newState)
+        {
+            case FleetState.Idle:
+                targetMovePosition = transform.position;
+                break;
+            case FleetState.Moving:
+                break;
+            case FleetState.Defending:
+                break;
+            case FleetState.Attacking:
+                chaseStart = transform.position;
+                if (targetedFleet)
+                {
+                    Vector3 attackVector = targetedFleet.transform.position - transform.position;
+                    Quaternion chaseRotation = Quaternion.Euler(0, Random.Range(-30, 30), 0);
+                    chaseOffset = chaseRotation * -attackVector.normalized * Mathf.Max(0, attackRange - 0.1f);
+                    targetTurnAngle = Quaternion.LookRotation(attackVector.normalized).eulerAngles.y;
+                }
+                break;
+        }
+        currentState = newState;
     }
 
     public void UpdateFormation()
     {
-        if (fleetFormationPrefab && formationDirty)
-        {
-            currentFormation = fleetFormationPrefab.GetBestShipFormation(activeShips.Count);
-            formationDirty = false;
+        //do moving
+        if (isMoving && !isTurning)
+        {    
+            Vector3 pos = transform.position;
+            Vector3 moveVector = targetMovePosition - pos;
+            if (moveVector.sqrMagnitude > 0.1f)
+            {
+                Vector3.SmoothDamp(pos, targetMovePosition, ref moveVelocity, 0.4f, maxFormationSpeed);
+                targetTurnAngle = Quaternion.LookRotation(moveVector.normalized).eulerAngles.y;
+            }
+            else
+            {
+                moveVelocity = Vector3.zero;
+            }
         }
-
-        isTurning = false;
-        isMoving = false;
-
-        foreach (Ship ship in activeShips)
-        {
-            isTurning |= ship.Turn(targetTurnAngle);
-        }
-        if (!isTurning)
-        {
-            Vector3.SmoothDamp(transform.position, targetMovePosition, ref moveVelocity, 0.4f, maxFormationSpeed);
-            isMoving = moveVelocity.sqrMagnitude > 0.01f;
-        }
-
-        if(!isMoving)
-        {
+        else
+        { 
             float deceleration = 10.0f;
             moveVelocity = Vector3.MoveTowards(moveVelocity, Vector3.zero, Time.deltaTime * deceleration);
         }
 
-        transform.position += moveVelocity * Time.deltaTime;
-
-        if (currentFormation)
+        //do turning
+        isTurning = false;
+        for(int i = 0; i < activeShips.Count; i++)
         {
-            for (int i = 0; i < activeShips.Count; i++)
-            {
-                activeShips[i].MoveToLocal(currentFormation.GetPositionAt(i));
-            }
+            isTurning |= activeShips[i].Turn(targetTurnAngle);
         }
-        else
+        if (moveVelocity.sqrMagnitude > 0.01f)
         {
-            for (int i = 0; i < activeShips.Count; i++)
-            {
-                activeShips[i].MoveToLocal(Vector3.zero);
-            }
+            transform.position += moveVelocity * Time.deltaTime;
         }
     }
 
-    void UpdateDefend()
+    public void UpdateTarget()
     {
-        if(defendedFleet && !isAttacking)
-        {
-            MoveFleetTo(defendedFleet.transform.position + defensivePosition);
-        }
-    }
-
-    void UpdateAttack()
-    {
-        isAttacking = false;
-        if (targetedFleet)
-        {
-            if (!isMoving && !isTurning)
-            {
-                Vector3 attackVector = targetedFleet.transform.position - transform.position;
-                Vector3 chaseVector = transform.position - chaseStart;
-                if (attackVector.sqrMagnitude <= (attackRange * attackRange) + 0.1f)
-                {
-                    isAttacking = true;
-                    //aim once we've stopped moving
-                    if (!isMoving)
-                    {
-                        targetTurnAngle = Quaternion.LookRotation(targetedFleet.transform.position - transform.position).eulerAngles.y;
-                    }
-                }
-                else if (chaseVector.sqrMagnitude < chaseRange * chaseRange)
-                {
-                    Quaternion chaseRotation = Quaternion.Euler(0, Random.Range(-30, 30), 0);
-                    MoveFleetTo(targetedFleet.transform.position - chaseRotation * attackVector.normalized * engagementRange);
-                }
-                else if(isChasing)
-                {
-                    MoveFleetTo(chaseStart);
-                    AttackOtherFleet(null);
-                }
-            }
-        }
-        bool shouldRefreshAttack = Time.time > lastAttackRefreshTime + attackRefreshRate;
-        if (!isAttacking || shouldRefreshAttack)
+        bool shouldRefreshTarget = Time.time > lastAttackRefreshTime + attackRefreshRate;
+        if (targetedFleet == null && shouldRefreshTarget)
         {
             lastAttackRefreshTime = Time.time;
-            isAttacking = willAttackWhenIdle && !isMoving && !isTurning;
-            isAttacking |= willAttackWhenDefending && defendedFleet && Vector3.Distance(defendedFleet.transform.position + defensivePosition, transform.position) < engagementRange;
-            if ((isAttacking && !targetedFleet) || shouldRefreshAttack)
+
+            //search for nearby enemy fleets
+            float minDistSq = engagementRange * engagementRange;
+            Fleet closestFleet = null;
+            for (int i = 0; i < Fleet.g_allFleets.Count; i++)
             {
-                //search for nearby enemy fleets
-                float minDistSq = engagementRange * engagementRange;
-                Fleet closestFleet = null;
-                foreach (Fleet fleet in FindObjectsOfType<Fleet>())
+                Fleet fleet = Fleet.g_allFleets[i];
+                if (fleet.team != this.team)
                 {
-                    if (fleet.team != this.team)
+                    float distSq = (fleet.transform.position - this.transform.position).sqrMagnitude;
+                    if (distSq < minDistSq)
                     {
-                        float distSq = (fleet.transform.position - this.transform.position).sqrMagnitude;
-                        if (distSq < minDistSq)
-                        {
-                            minDistSq = distSq;
-                            closestFleet = fleet;
-                        }
+                        minDistSq = distSq;
+                        closestFleet = fleet;
                     }
                 }
-                if (closestFleet)
-                {
-                    AttackOtherFleet(closestFleet, true);
-                }
             }
-        }
-
-        if (isAttacking)
-        {
-            foreach (Ship ship in activeShips)
+            if (closestFleet != null)
             {
-                ship.AttackFleet(targetedFleet);
-            }
-        }
-        else
-        {
-            foreach (Ship ship in activeShips)
-            {
-                ship.AttackFleet(null);
+                targetedFleet = closestFleet;
+                isAutoAttacking = true;
+                SetState(FleetState.Attacking);
             }
         }
     }
@@ -261,8 +365,8 @@ public class Fleet : MonoBehaviour {
                 gobj.transform.parent = this.transform;
                 Ship newShip = gobj.GetComponent<Ship>();
                 newShip.team = team;
+                newShip.powerValue = powerGainedWhenMaxShipCountKilled / maxShipCount;
                 activeShips.Add(newShip);
-                formationDirty = true;
             }
         }
         UpdateFormation();
@@ -270,31 +374,36 @@ public class Fleet : MonoBehaviour {
 
     public void MoveFleetTo(Vector3 position)
     {
-        if (Vector3.Distance(position, targetMovePosition) > 0.1f)
+        Vector3 moveVector = position - transform.position;
+        if (moveVector.sqrMagnitude > 0.1f)
         {
             targetMovePosition = position;
-            targetTurnAngle = Quaternion.LookRotation(position - transform.position).eulerAngles.y;
-            formationDirty = true;
-            isMoving = true;
+            SetState(FleetState.Moving);
         }
     }
 
     public void StopMoving()
     {
-        isMoving = false;
+        if(currentState == FleetState.Moving)
+        {
+            SetState(FleetState.Idle);
+        }
     }
 
-    public void AttackOtherFleet(Fleet fleetToAttack, bool chase = true)
+    public void AttackOtherFleet(Fleet fleetToAttack)
     {
         targetedFleet = fleetToAttack;
-        chaseStart = transform.position;
-        isChasing = chase;
+        isAutoAttacking = false;
+        if (targetedFleet)
+        {
+            SetState(FleetState.Attacking);
+        }
     }
 
     public void DefendOtherFleet(Fleet fleetToDefend)
     {
         defendedFleet = fleetToDefend;
-        if(defendedFleet)
+        if(defendedFleet != null)
         {
             defensivePosition = Quaternion.Euler(0, Random.Range(0.0f, 360f), 0) * Vector3.forward;
             if (defendedFleet.selectCircle)
@@ -307,6 +416,7 @@ public class Fleet : MonoBehaviour {
             {
                 defensivePosition *= 4.0f;
             }
+            SetState(FleetState.Defending);
         }
     }
 
@@ -316,32 +426,10 @@ public class Fleet : MonoBehaviour {
         return activeShips[Random.Range(0, activeShips.Count)];
     }
 
-    public int GetHealth()
-    {
-        int totalHealth = 0;
-        foreach(Ship ship in activeShips)
-        {
-            Health health = ship.GetComponent<Health>();
-            if (health)
-            {
-                totalHealth += health.current;
-            }
-        }
-        return totalHealth;
-    }
-
-    public int GetMaxHealth()
-    {
-        if(shipPrefab)
-        {
-            Health health = shipPrefab.GetComponent<Health>();
-            if(health)
-            {
-                return health.max * maxShipCount;
-            }
-        }
-        return 0;
-    }
+    public int Health { get { return cachedHealth; } }
+    private int cachedHealth = 0;
+    public int MaxHealth { get { return cachedMaxHealth; } }
+    private int cachedMaxHealth = 0;
 
     public bool IsHighlighted { get { return isHighlighted; } }
     private bool isHighlighted = false;
@@ -370,11 +458,11 @@ public class Fleet : MonoBehaviour {
 
     void OnHighlighted()
     {
-        if(highlightCircle)
+        if(highlightCircle != null)
         {
             highlightCircle.gameObject.SetActive(true);
         }
-        if(engagementRangeCircle)
+        if(engagementRangeCircle != null)
         {
             engagementRangeCircle.gameObject.SetActive(true);
         }
@@ -382,11 +470,11 @@ public class Fleet : MonoBehaviour {
 
     void OnUnhighted()
     {
-        if (highlightCircle)
+        if (highlightCircle != null)
         {
             highlightCircle.gameObject.SetActive(false);
         }
-        if (engagementRangeCircle)
+        if (engagementRangeCircle != null)
         {
             engagementRangeCircle.gameObject.SetActive(false);
         }
@@ -410,7 +498,7 @@ public class Fleet : MonoBehaviour {
 
     void OnSelected()
     {
-        if (selectCircle)
+        if (selectCircle != null)
         {
             selectCircle.gameObject.SetActive(true);
         }
@@ -418,7 +506,7 @@ public class Fleet : MonoBehaviour {
 
     void OnDeselected()
     {
-        if (selectCircle)
+        if (selectCircle != null)
         {
             selectCircle.gameObject.SetActive(false);
         }
@@ -452,17 +540,27 @@ public class Fleet : MonoBehaviour {
 
     private void OnDrawGizmos()
     {
-        if(targetedFleet)
+        if(targetedFleet != null)
         {
             Gizmos.color = new Color(1,0,0, 0.4f);
             Gizmos.DrawLine(transform.position, targetedFleet.transform.position);
         }
     }
 
+    static GUIStyle controlGroupTextStyle;
+    static bool initControlGroupStyle = false;
     protected virtual void OnGUI()
     {
         if(controlGroup >= 0 && isSelected)
         {
+            if(!initControlGroupStyle)
+            {
+                initControlGroupStyle = true;
+                controlGroupTextStyle = GUI.skin.label;
+                controlGroupTextStyle.fontSize = 20;
+                controlGroupTextStyle.alignment = TextAnchor.MiddleCenter;
+            }
+
             Color guiContentColor = GUI.contentColor;
 
             Vector2 screenPos = Camera.main.WorldToScreenPoint(transform.position);
@@ -471,16 +569,13 @@ public class Fleet : MonoBehaviour {
             Vector2 size = new Vector2(50, 50);
             Rect rect = new Rect(GUIUtility.ScreenToGUIPoint(screenPos) - size * 0.5f, size);
 
-            GUIStyle style = GUI.skin.label;
-            style.fontSize = 20;
-            style.alignment = TextAnchor.MiddleCenter;
             GUI.contentColor = Color.black;
 
             Rect shadowRect = new Rect(rect.position + new Vector2(1, 1), rect.size);
-            GUI.Label(shadowRect, controlGroup.ToString(), style);
+            GUI.Label(shadowRect, controlGroup.ToString(), controlGroupTextStyle);
 
             GUI.contentColor = Color.white;
-            GUI.Label(rect, controlGroup.ToString(), style);
+            GUI.Label(rect, controlGroup.ToString(), controlGroupTextStyle);
 
             GUI.contentColor = guiContentColor;
         }

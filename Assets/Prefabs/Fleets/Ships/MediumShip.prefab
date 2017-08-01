@@ -416,7 +416,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: -1
   maxTurnTime: 2
-  powerValue: 10
+  powerValue: 100
   weapon: {fileID: 114147200332917420}
 --- !u!114 &114147200332917420
 MonoBehaviour:
@@ -429,9 +429,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cac27e0dddb480946b055183368979d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fireRate: 1.5
-  salvoCount: 3
-  damagePerMissile: 8
+  fireRate: 1
+  salvoCount: 1
+  damagePerMissile: 7
   missileAngleSpread: 45
   projectilePrefab: {fileID: 114634231263074124, guid: 138c6ccc02232bb4dbc2ad31d9299ada,
     type: 2}
@@ -447,7 +447,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isInvulnerable: 0
-  max: 200
+  max: 100
   current: 1
   destroyOnDeath: 1
   spawnOnStart:

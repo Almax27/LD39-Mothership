@@ -16,6 +16,7 @@ public class FleetSpawner : MonoBehaviour {
     public int fleetCountPerInterval = 1;
     public int team = 1;
     public float spawnRadius = 5;
+    public float mothershipRadius = -1;
     public SpawnFacing spawnFacing = SpawnFacing.Random;
     public bool autoTargetMothership = false;
     [Tooltip("Override chase range of spawned fleets, negative numbers are ignored")]
@@ -32,6 +33,7 @@ public class FleetSpawner : MonoBehaviour {
     float tick = 0;
     int intervals = 0;
     float nextInterval = 0;
+    Mothership mothership = null;
 
 
 	// Use this for initialization
@@ -41,7 +43,18 @@ public class FleetSpawner : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (intervals < maxIntervals)
+        if(mothership == null)
+        {
+            mothership = FindObjectOfType<Mothership>();
+        }
+        if(mothership && mothershipRadius > 0)
+        {
+            if((mothership.transform.position - transform.position).sqrMagnitude > mothershipRadius * mothershipRadius)
+            {
+                return;
+            }
+        }
+        if (maxIntervals < 0 || intervals < maxIntervals)
         {
             tick += Time.deltaTime;
             if (tick > nextInterval)
@@ -105,6 +118,18 @@ public class FleetSpawner : MonoBehaviour {
         Color teamColor = GameManager.GetTeamColor(team);
         DebugExtension.DrawCircle(transform.position, teamColor, spawnRadius);
         Vector3 arrowOffset = Vector3.up * 2.0f;
-        DebugExtension.DrawArrow(transform.position + arrowOffset, -arrowOffset, teamColor);
+        if (autoTargetMothership)
+        {
+            DebugExtension.DrawArrow(transform.position, -transform.position.normalized * (spawnRadius + 1.0f), Color.white);
+        }
+        else
+        {
+            DebugExtension.DrawArrow(transform.position + arrowOffset, -arrowOffset, Color.white);
+        }
+
+        if(mothershipRadius > 0)
+        {
+            DebugExtension.DrawCircle(transform.position, Color.white, mothershipRadius);
+        }
     }
 }

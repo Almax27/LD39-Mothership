@@ -25,6 +25,7 @@ public class FAFAudio : SingletonBehaviour<FAFAudio>
             source.Play();
 
             autoDestruct.delay = _clip.length;
+            autoDestruct.waitForParticles = false;
         }
     }
 

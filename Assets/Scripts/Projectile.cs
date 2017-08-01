@@ -18,36 +18,26 @@ public class Projectile : MonoBehaviour {
     public List<GameObject> spawnOnHit = new List<GameObject>();
     public List<GameObject> spawnAutoDestruct = new List<GameObject>();
 
+    public AudioClip fireSound = null;
+    public float fireAudioVolume = 1;
+    public AudioClip hitSound = null;
+    public float hitAudioVolume = 1;
+
     Transform target = null;
     Transform source = null;
     float tick = 0;
     int damageOnHit = 0;
     Vector3 currentDirection = Vector3.up;
 
-    public void OnFired(Transform targetObject, Transform sourceObject, int damage, Vector3 initialPosition, Vector3 initialDirection)
-    {
-		target = targetObject;
-        source = sourceObject;
-        damageOnHit = damage;
-        currentDirection = initialDirection;
-        transform.SetPositionAndRotation(initialPosition, Quaternion.LookRotation(initialDirection));
+    AudioSource audioSource;
+    static float lastSoundTime = 0;
 
-        int team = 0;
-        if (source)
+    private void Awake()
+    {
+        if(audioSource == null)
         {
-            Ship ship = source.GetComponent<Ship>();
-            if(ship)
-            {
-                team = ship.team;
-            }
-        }
-        Color teamColor = GameManager.GetTeamColor(team);
-        foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
-        {
-            foreach(Material mat in renderer.materials)
-            {
-                mat.color = teamColor;
-            }
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.pitch = audioSource.pitch + Random.Range(-0.2f, 0.2f);
         }
     }
 
@@ -68,7 +58,7 @@ public class Projectile : MonoBehaviour {
             Vector3 targetVector = target.transform.position - this.transform.position;
             if(targetVector.sqrMagnitude < 0.1f)
             {
-                OnHitTarget(target, targetVector.normalized);
+                OnHitTarget(targetVector.normalized);
             }
             else
             {
@@ -85,8 +75,43 @@ public class Projectile : MonoBehaviour {
                 }
             }
         }
+        else
+        {
+            SelfDestruct();
+        }
         Vector3 position = transform.position + currentDirection.normalized * currentStage.speed * Time.deltaTime;
         transform.SetPositionAndRotation(position, Quaternion.LookRotation(currentDirection));
+    }
+
+    public void OnFired(Transform targetObject, Transform sourceObject, int damage, Vector3 initialPosition, Vector3 initialDirection)
+    {
+        target = targetObject;
+        source = sourceObject;
+        damageOnHit = damage;
+        currentDirection = initialDirection;
+        transform.SetPositionAndRotation(initialPosition, Quaternion.LookRotation(initialDirection));
+
+        int team = 0;
+        if (source)
+        {
+            Ship ship = source.GetComponent<Ship>();
+            if (ship)
+            {
+                team = ship.team;
+            }
+        }
+        Color teamColor = GameManager.GetTeamColor(team);
+        foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
+        {
+            foreach (Material mat in renderer.materials)
+            {
+                mat.color = teamColor;
+            }
+        }
+        if(fireSound != null)
+        {
+            PlaySound(fireSound, fireAudioVolume);
+        }
     }
 
     ProjectileStage GetCurrentStage()
@@ -103,7 +128,7 @@ public class Projectile : MonoBehaviour {
         return null;
     }
 
-    void OnHitTarget(Transform target, Vector3 direction)
+    void OnHitTarget(Vector3 direction)
     {
         foreach(GameObject objToSpawn in spawnOnHit)
         {
@@ -119,8 +144,15 @@ public class Projectile : MonoBehaviour {
             damagePacket.Send(target, source);
         }
 
+        float destroyDelay = 0;
+        if (hitSound != null)
+        {
+            destroyDelay = hitSound.length;
+            PlaySound(hitSound, hitAudioVolume);
+        }
+
         target = null;
-        Destroy(this.gameObject);
+        Destroy(this.gameObject, destroyDelay);
     }
 
     void SelfDestruct()
@@ -132,6 +164,16 @@ public class Projectile : MonoBehaviour {
         }
 
         target = null;
-        Destroy(this.gameObject);
+        AutoDestruct autoDestruct = gameObject.AddComponent<AutoDestruct>();
+        autoDestruct.stopParticlesEmitting = true;
+        Destroy(this);
+    }
+
+    void PlaySound(AudioClip clip, float volume)
+    {
+        if(Time.time > lastSoundTime + 0.15f)
+        {
+            audioSource.PlayOneShot(clip, volume);
+        }
     }
 }

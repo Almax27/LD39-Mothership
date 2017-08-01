@@ -12,6 +12,7 @@ public class FleetCommander : MonoBehaviour
     List<Fleet> selectedList = new List<Fleet>();
     List<Fleet> highlightedList = new List<Fleet>();
     Dictionary<int, List<Fleet>> controlGroups = new Dictionary<int, List<Fleet>>();
+    int selectedControlGroup = -1;
 
     public int teamToSelect = -1;
     public float minDragDistance = 5;
@@ -24,6 +25,12 @@ public class FleetCommander : MonoBehaviour
 
     void Update()
     {
+        selectedList.RemoveAll(s => s == null);
+        highlightedList.RemoveAll(s => s == null);
+        foreach(List<Fleet> controlGroup in controlGroups.Values)
+        {
+            controlGroup.RemoveAll(s => s == null);
+        }
         ProcessSelection();
         ProcessActions();
     }
@@ -52,8 +59,9 @@ public class FleetCommander : MonoBehaviour
             if (Vector3.Distance(mouseDownPosition, Input.mousePosition) > minDragDistance)
             {
                 isDragingArea = true;
-                foreach (var selectable in FindObjectsOfType<Fleet>())
+                for (int i = 0; i < Fleet.g_allFleets.Count; i++)
                 {
+                    Fleet selectable = Fleet.g_allFleets[i];
                     if (selectable.IsHighlighted || CanHighlight(selectable))
                     {
                         bool highlight = CanSelect(selectable) && InSelectionBounds(selectable);
@@ -77,15 +85,16 @@ public class FleetCommander : MonoBehaviour
         else
         {
             Fleet closestSelectable = GetClosestSelectable();
-            foreach(Fleet selectable in highlightedList)
+            for (int i = 0; i < Fleet.g_allFleets.Count; i++)
             {
-                if(selectable != closestSelectable)
+                Fleet selectable = Fleet.g_allFleets[i];
+                if (selectable != closestSelectable)
                 {
                     selectable.SetIsHighlighted(false);
                 }
             }
             highlightedList.Clear();
-            if (closestSelectable)
+            if (closestSelectable != null)
             {
                 closestSelectable.SetIsHighlighted(true);
                 highlightedList.Add(closestSelectable);
@@ -101,9 +110,9 @@ public class FleetCommander : MonoBehaviour
             { //log selection information
                 var sb = new StringBuilder();
                 sb.AppendLine(string.Format("Selecting [{0}] Units", selectedList.Count));
-                foreach (var selectable in selectedList)
+                for (int i = 0; i < selectedList.Count; i++)
                 {
-                    sb.AppendLine("-> " + selectable.gameObject.name);
+                    sb.AppendLine("-> " + selectedList[i].gameObject.name);
                 }
                 Debug.Log(sb.ToString());
             }
@@ -129,6 +138,22 @@ public class FleetCommander : MonoBehaviour
 
     void ProcessActions()
     {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            MothershipFleet mothershipFleet = FindObjectOfType<MothershipFleet>();
+            if (mothershipFleet != null)
+            {
+                for (int i = 0; i < Fleet.g_allFleets.Count; i++)
+                {
+                    Fleet fleet = Fleet.g_allFleets[i];
+                    if (CanSelect(fleet))
+                    {
+                        fleet.DefendOtherFleet(mothershipFleet);
+                    }
+                }
+            }
+        }
+
         if (selectedList.Count <= 0)
             return;
 
@@ -145,20 +170,22 @@ public class FleetCommander : MonoBehaviour
                     for(int i = 0; i < selectedList.Count; i++)
                     {
                         Fleet selectable = selectedList[i];
-
-                        //move closer if we need to
-                        if (attackVector.sqrMagnitude > selectable.engagementRange * selectable.engagementRange)
+                        if (selectable != null && selectable.canBeCommanded)
                         {
-                            float rotDir = i % 2 == 0 ? 1 : -1;
-                            attackVector = Quaternion.Euler(0, rotDir * i * 0.5f * attackMoveSpreadDegrees, 0.0f) * attackVector;
-                            Vector3 attackPosition = highlighted.transform.position - attackVector.normalized * (selectable.engagementRange - 0.5f);
-                            selectable.MoveFleetTo(attackPosition);
-                        }
+                            //move closer if we need to
+                            if (attackVector.sqrMagnitude > selectable.attackRange * selectable.attackRange)
+                            {
+                                float rotDir = i % 2 == 0 ? 1 : -1;
+                                attackVector = Quaternion.Euler(0, rotDir * i * 0.5f * attackMoveSpreadDegrees, 0.0f) * attackVector;
+                                Vector3 attackPosition = highlighted.transform.position - attackVector.normalized * (selectable.attackRange - 0.5f);
+                                selectable.MoveFleetTo(attackPosition);
+                            }
 
-                        //attack
-                        selectable.AttackOtherFleet(highlighted);
-                        //cancel defend
-                        selectable.DefendOtherFleet(null);
+                            //attack
+                            selectable.AttackOtherFleet(highlighted);
+                            //cancel defend
+                            selectable.DefendOtherFleet(null);
+                        }
                     }
                 }
                 else
@@ -175,13 +202,17 @@ public class FleetCommander : MonoBehaviour
             {//move
                 Vector3 mapPosition = ScreenToMapPosition(Input.mousePosition);
                 Formation formation = Formation.SelectBestFormation<Formation>(selectionMoveFormations, selectedList.Count);
-                if(formation)
+                if(formation != null)
                 {
                     for (int i = 0; i < selectedList.Count; i++)
                     {
-                        selectedList[i].AttackOtherFleet(null);
-                        selectedList[i].DefendOtherFleet(null);
-                        selectedList[i].MoveFleetTo(mapPosition + formation.GetPositionAt(i));
+                        Fleet selectable = selectedList[i];
+                        if (selectable != null)
+                        {
+                            selectable.AttackOtherFleet(null);
+                            selectable.DefendOtherFleet(null);
+                            selectable.MoveFleetTo(mapPosition + formation.GetPositionAt(i));
+                        }
                     }
                 }
             }
@@ -194,9 +225,9 @@ public class FleetCommander : MonoBehaviour
         if(controlGroups.ContainsKey(index))
         {
             List<Fleet> oldGroup = controlGroups[index];
-            foreach(Fleet fleet in oldGroup)
+            for (int i = 0; i < oldGroup.Count; i++)
             {
-                fleet.ControlGroup = -1;
+                oldGroup[i].ControlGroup = -1;
             }
         }
         List<Fleet> newGroup = new List<Fleet>();
@@ -222,16 +253,25 @@ public class FleetCommander : MonoBehaviour
         if (controlGroups.ContainsKey(index))
         {
             List<Fleet> group = controlGroups[index];
-            if (group != null)
+            if (group != null && group.Count > 0)
             {
+                if (index == selectedControlGroup)
+                {
+                    var playerController = GetComponent<PlayerController>();
+                    if (playerController != null)
+                    {
+                        playerController.MoveCameraTo(group[0].transform);
+                    }
+                }
                 Select(group);
+                selectedControlGroup = index;
             }
         }
     }
 
     public bool CanSelect(Fleet selectable)
     {
-        bool canSelect = selectable && (teamToSelect < 0 || selectable.team == teamToSelect);
+        bool canSelect = selectable != null && (selectable.team == teamToSelect);
         return canSelect;
     }
 
@@ -247,39 +287,38 @@ public class FleetCommander : MonoBehaviour
         return viewportBounds.Contains(camera.WorldToViewportPoint(selectionObject.transform.position));
     }
 
-    public float GetSelectableDistance(Fleet selectionObject)
+    public float GetSelectableDistanceSq(Fleet selectionObject)
     {
-        if (selectionObject)
+        if (selectionObject != null)
         {
             var mouseMapPos = ScreenToMapPosition(Input.mousePosition);
-            return Vector3.Distance(selectionObject.transform.position, mouseMapPos);
+            return (selectionObject.transform.position - mouseMapPos).sqrMagnitude;
         }
         return float.MaxValue;
     }
 
     public Fleet GetClosestSelectable()
     {
-        float minDist = float.MaxValue;
+        float minDistSq = float.MaxValue;
         Fleet closestSelectable = null;
-        foreach (var selectable in FindObjectsOfType<Fleet>())
+        for(int i = 0; i < Fleet.g_allFleets.Count; i++)
         {
-            float dist = GetSelectableDistance(selectable);
-            float selectRadius = selectable.selectCircle ? selectable.selectCircle.outerRadius : defaultSelectionDistance;
-            if (dist < minDist && dist < selectRadius)
+            Fleet selectable = Fleet.g_allFleets[i];
+            float distSq = GetSelectableDistanceSq(selectable);
+            float selectRadius = selectable.selectCircle != null ? selectable.selectCircle.outerRadius : defaultSelectionDistance;
+            if (distSq < minDistSq && distSq < selectRadius)
             {
-                minDist = dist;
+                minDistSq = distSq;
                 closestSelectable = selectable;
             }
         }
         return closestSelectable;
     }
 
+    private static Plane mapPlane = new Plane(Vector3.up, Vector3.zero);
     public static bool ScreenToMapPosition(Vector3 screenPos, out Vector3 mapPos)
     {
-        Vector3 worldPos = Vector3.zero;
-        var camera = Camera.main;
-        Ray ray = camera.ScreenPointToRay(screenPos);
-        Plane mapPlane = new Plane(Vector3.up, Vector3.zero);
+        Ray ray = Camera.main.ScreenPointToRay(screenPos);
         float distance = 0;
         if(mapPlane.Raycast(ray, out distance))
         {
@@ -304,6 +343,7 @@ public class FleetCommander : MonoBehaviour
             selectable.SetIsSelected(false);
         }
         selectedList.Clear();
+        selectedControlGroup = -1;
     }
 
     public void Select(Fleet selectable)
@@ -330,7 +370,7 @@ public class FleetCommander : MonoBehaviour
                     selectedList.Add(selectable);
                     didSelect = true;
                 }
-                else if(selectable)
+                else if(selectable != null)
                 {
                     selectable.SetIsSelected(false);
                 }

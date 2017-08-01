@@ -108,7 +108,6 @@ GameObject:
   - component: {fileID: 224914444352555228}
   - component: {fileID: 223949519040731108}
   - component: {fileID: 114790550327871028}
-  - component: {fileID: 114237154580272332}
   - component: {fileID: 114021498964786784}
   - component: {fileID: 114383116593465918}
   m_Layer: 5
@@ -348,7 +347,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: 0
-  powerCostToSpawn: 100
+  powerCostToSpawn: 120
+  powerGainedWhenMaxShipCountKilled: 200
   fleetFormationPrefab: {fileID: 114465267508653148, guid: a17996ffd2dd2754dabbb1378cc39f48,
     type: 2}
   shipPrefab: {fileID: 114082969111382310, guid: fa3a8af61bc09ce46a88112f0dc166d6,
@@ -357,27 +357,18 @@ MonoBehaviour:
   maxShipCount: 3
   canBeMultiSelected: 1
   canBeAddedToControlGroups: 1
+  canBeCommanded: 1
+  canAttackFromIdle: 1
+  canAttackFromDefending: 1
+  canAttackWhileMoving: 0
   maxFormationSpeed: 4
-  engagementRange: 5
+  attackRange: 15
+  engagementRange: 15
+  chaseRange: 5
+  attackRefreshRate: 1
   selectCircle: {fileID: 114751823610932040}
   highlightCircle: {fileID: 114992698626993830}
   engagementRangeCircle: {fileID: 114946597093576158}
---- !u!114 &114237154580272332
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1476745469170402}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1301386320, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &114383116593465918
 MonoBehaviour:
   m_ObjectHideFlags: 1

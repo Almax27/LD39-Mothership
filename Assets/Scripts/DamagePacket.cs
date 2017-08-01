@@ -23,5 +23,10 @@ public class DamagePacket
         {
             health.Damage(new DamagePacket(this));
         }
+        foreach (Mothership mothership in target.GetComponents<Mothership>())
+        {
+            MothershipFleet fleet = mothership.GetComponentInParent<MothershipFleet>();
+            fleet.CurrentPower -= value;
+        }
     }
 }

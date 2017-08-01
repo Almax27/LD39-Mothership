@@ -73,7 +73,6 @@ GameObject:
   - component: {fileID: 224536077311795664}
   - component: {fileID: 223276140811726658}
   - component: {fileID: 114109950587417982}
-  - component: {fileID: 114514221791945524}
   - component: {fileID: 114270471592416190}
   - component: {fileID: 114879094435199932}
   m_Layer: 5
@@ -449,27 +448,17 @@ MonoBehaviour:
   maxShipCount: 3
   canBeMultiSelected: 1
   canBeAddedToControlGroups: 1
+  canBeCommanded: 1
+  willAttackWhenIdle: 1
+  willAttackWhenDefending: 1
   maxFormationSpeed: 4
-  engagementRange: 5
+  attackRange: 8
+  engagementRange: 10
+  chaseRange: 5
+  attackRefreshRate: 1
   selectCircle: {fileID: 114144515753343584}
   highlightCircle: {fileID: 114595373084922144}
   engagementRangeCircle: {fileID: 114917977644997230}
---- !u!114 &114514221791945524
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1128272592157214}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1301386320, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &114595373084922144
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -300,7 +300,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fireRate: 1
-  damage: 2
+  damage: 5
   projectilePrefab: {fileID: 114061634450101724, guid: 89783b358fac44e4fb0b6974b91e5e12,
     type: 2}
 --- !u!114 &114355907541626006
@@ -315,10 +315,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isInvulnerable: 0
-  max: 100
+  max: 30
   current: 1
   destroyOnDeath: 1
-  powerValue: 10
   spawnOnStart:
   - gameobject: {fileID: 0}
     addAsChild: 0
@@ -349,6 +348,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: -1
   maxTurnTime: 1
-  maxHealth: 100
-  health: 0
+  powerValue: 40
   weapon: {fileID: 114081622799079130}

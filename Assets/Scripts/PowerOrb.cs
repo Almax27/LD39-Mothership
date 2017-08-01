@@ -62,10 +62,15 @@ public class PowerOrb : MonoBehaviour {
     void OnCollected()
     {
         AutoDestruct();
+        MothershipFleet mothershipFleet = FindObjectOfType<MothershipFleet>();
+        if(mothershipFleet)
+        {
+            mothershipFleet.CurrentPower += powerValue;
+        }
     }
 
     void AutoDestruct()
     {
-        AutoDestruct autoDestruct = gameObject.AddComponent<AutoDestruct>();
+        gameObject.AddComponent<AutoDestruct>();
     }
 }
