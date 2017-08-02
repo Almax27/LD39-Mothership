@@ -2150,68 +2150,6 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 25e47e1af905fa94c8edafdd589551d8, type: 3}
   m_IsPrefabParent: 0
---- !u!1001 &313108075
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: 2.6140184
-      objectReference: {fileID: 0}
-    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0.8311037
-      objectReference: {fileID: 0}
-    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: -1.8278372
-      objectReference: {fileID: 0}
-    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
-      propertyPath: m_RootOrder
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 114281186243864144, guid: 91184e4f66c2ace4b86d3e206e369e36,
-        type: 2}
-      propertyPath: maxPowerPerOrb
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 114723851855216854, guid: 91184e4f66c2ace4b86d3e206e369e36,
-        type: 2}
-      propertyPath: m_Text
-      value: Light (50)
-      objectReference: {fileID: 0}
-    - target: {fileID: 114691807068006236, guid: 91184e4f66c2ace4b86d3e206e369e36,
-        type: 2}
-      propertyPath: m_Text
-      value: Medium (120)
-      objectReference: {fileID: 0}
-    - target: {fileID: 114281186243864144, guid: 91184e4f66c2ace4b86d3e206e369e36,
-        type: 2}
-      propertyPath: music
-      value: 
-      objectReference: {fileID: 8300000, guid: b90d2518fd55caa4cadb449d3d0d407c, type: 3}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
-  m_IsPrefabParent: 0
 --- !u!4 &315441079 stripped
 Transform:
   m_PrefabParentObject: {fileID: 400000, guid: 25e47e1af905fa94c8edafdd589551d8, type: 3}
@@ -5261,6 +5199,115 @@ Prefab:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 25e47e1af905fa94c8edafdd589551d8, type: 3}
+  m_IsPrefabParent: 0
+--- !u!1001 &782867575
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: -186
+      objectReference: {fileID: 0}
+    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 223
+      objectReference: {fileID: 0}
+    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: -1.8278372
+      objectReference: {fileID: 0}
+    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4375038578417838, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
+      propertyPath: m_RootOrder
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114958706483127254, guid: 91184e4f66c2ace4b86d3e206e369e36,
+        type: 2}
+      propertyPath: m_Text
+      value: "<b>WSAD/Arrows</b> = Move camera\n<b>Left click</b> = Select units (friendly
+        only)\r\n<b>Right click</b> = Issue move/attack commands\n\n<b>Alt + [0-9]</b>
+        = assign selected fleets to a group\n<b>0-9</b> = select group\n<b>0-9</b>
+        when selected = zoom to group\n\n<b>L</b> = Spawn a light fleet         <color=#2da9fc><i>(50
+        power)</i></color>\n<b>M</b> = Spawn a missile fleet    <color=#2da9fc><i>(120
+        power)</i></color>\n\n<b>Space</b> = Select mothership (again to zoom)\n<b>R</b>
+        = Recall all fleets to mothership"
+      objectReference: {fileID: 0}
+    - target: {fileID: 114958706483127254, guid: 91184e4f66c2ace4b86d3e206e369e36,
+        type: 2}
+      propertyPath: m_Color.r
+      value: 0.91764706
+      objectReference: {fileID: 0}
+    - target: {fileID: 114958706483127254, guid: 91184e4f66c2ace4b86d3e206e369e36,
+        type: 2}
+      propertyPath: m_Color.g
+      value: 0.91764706
+      objectReference: {fileID: 0}
+    - target: {fileID: 114958706483127254, guid: 91184e4f66c2ace4b86d3e206e369e36,
+        type: 2}
+      propertyPath: m_Color.b
+      value: 0.91764706
+      objectReference: {fileID: 0}
+    - target: {fileID: 114372881056302018, guid: 91184e4f66c2ace4b86d3e206e369e36,
+        type: 2}
+      propertyPath: m_Color.r
+      value: 0.91764706
+      objectReference: {fileID: 0}
+    - target: {fileID: 114372881056302018, guid: 91184e4f66c2ace4b86d3e206e369e36,
+        type: 2}
+      propertyPath: m_Color.g
+      value: 0.91764706
+      objectReference: {fileID: 0}
+    - target: {fileID: 114372881056302018, guid: 91184e4f66c2ace4b86d3e206e369e36,
+        type: 2}
+      propertyPath: m_Color.b
+      value: 0.91764706
+      objectReference: {fileID: 0}
+    - target: {fileID: 114154018383758902, guid: 91184e4f66c2ace4b86d3e206e369e36,
+        type: 2}
+      propertyPath: m_Color.r
+      value: 0.91764706
+      objectReference: {fileID: 0}
+    - target: {fileID: 114154018383758902, guid: 91184e4f66c2ace4b86d3e206e369e36,
+        type: 2}
+      propertyPath: m_Color.g
+      value: 0.91764706
+      objectReference: {fileID: 0}
+    - target: {fileID: 114154018383758902, guid: 91184e4f66c2ace4b86d3e206e369e36,
+        type: 2}
+      propertyPath: m_Color.b
+      value: 0.91764706
+      objectReference: {fileID: 0}
+    - target: {fileID: 114154018383758902, guid: 91184e4f66c2ace4b86d3e206e369e36,
+        type: 2}
+      propertyPath: m_Text
+      value: '<color=orange><size=70><b>Mothership</b></size></color>
+
+
+        Your reactor is leaking!
+
+        Protect the mothership and collect power from hostile fleets to safely make
+        it home'
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 91184e4f66c2ace4b86d3e206e369e36, type: 2}
   m_IsPrefabParent: 0
 --- !u!4 &784212861 stripped
 Transform:
