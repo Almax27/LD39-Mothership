@@ -318,6 +318,7 @@ MonoBehaviour:
   spawnOnHit:
   - {fileID: 1656584723649392, guid: 379e9e2ba5a5a99499ab4e42145af0ab, type: 2}
   spawnAutoDestruct: []
+  waitForParticlesOnDestruct: 1
   fireSound: {fileID: 8300000, guid: 0b0c4e81811149b43b7fcf576b9f9c40, type: 3}
   fireAudioVolume: 0.1
   hitSound: {fileID: 8300000, guid: 7f2318cd17e95b440992012d7500652e, type: 3}

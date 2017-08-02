@@ -18,6 +18,8 @@ public class Projectile : MonoBehaviour {
     public List<GameObject> spawnOnHit = new List<GameObject>();
     public List<GameObject> spawnAutoDestruct = new List<GameObject>();
 
+    public bool waitForParticlesOnDestruct = true;
+
     public AudioClip fireSound = null;
     public float fireAudioVolume = 1;
     public AudioClip hitSound = null;
@@ -28,6 +30,7 @@ public class Projectile : MonoBehaviour {
     float tick = 0;
     int damageOnHit = 0;
     Vector3 currentDirection = Vector3.up;
+    bool pendingDestroy = false;
 
     AudioSource audioSource;
     static float lastSoundTime = 0;
@@ -43,6 +46,13 @@ public class Projectile : MonoBehaviour {
 
     private void Update()
     {
+        if(pendingDestroy)
+        {
+            if(!audioSource.isPlaying)
+            {
+                Destroy(this.gameObject);
+            }
+        }
         tick += Time.deltaTime;
 
         ProjectileStage currentStage = GetCurrentStage();
@@ -151,8 +161,8 @@ public class Projectile : MonoBehaviour {
             PlaySound(hitSound, hitAudioVolume);
         }
 
+        HideAndDestroy();
         target = null;
-        Destroy(this.gameObject, destroyDelay);
     }
 
     void SelfDestruct()
@@ -164,9 +174,24 @@ public class Projectile : MonoBehaviour {
         }
 
         target = null;
-        AutoDestruct autoDestruct = gameObject.AddComponent<AutoDestruct>();
-        autoDestruct.stopParticlesEmitting = true;
-        Destroy(this);
+        if (waitForParticlesOnDestruct)
+        {
+            AutoDestruct autoDestruct = gameObject.AddComponent<AutoDestruct>();
+            autoDestruct.stopParticlesEmitting = true;
+        }
+        else
+        {
+            HideAndDestroy();
+        }
+    }
+
+    void HideAndDestroy()
+    {
+        foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
+        {
+            renderer.enabled = false;
+        }
+        pendingDestroy = true;
     }
 
     void PlaySound(AudioClip clip, float volume)
