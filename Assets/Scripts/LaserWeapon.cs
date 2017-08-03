@@ -53,9 +53,11 @@ public class LaserWeapon : ShipWeapon
 
     void Fire(Vector3 direction)
     {
-        GameObject gobj = Instantiate<GameObject>(projectilePrefab.gameObject);
-        Projectile projectile = gobj.GetComponent<Projectile>();
-
-        projectile.OnFired(targetShip.transform, owningShip.transform, damage, transform.position, direction.normalized);
+        GameObject gobj = GameObjectPoolManager.Instance.GetOrCreate(projectilePrefab.gameObject);
+        if(gobj != null)
+        {
+            Projectile projectile = gobj.GetComponent<Projectile>();
+            projectile.OnFired(targetShip.transform, owningShip.transform, damage, transform.position, direction.normalized);
+        }
     }
 }

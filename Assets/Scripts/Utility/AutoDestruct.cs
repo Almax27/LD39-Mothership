@@ -4,6 +4,7 @@ using System.Collections;
 public class AutoDestruct : MonoBehaviour {
 
     public float delay;
+    public bool makeInactive = false;
     public bool waitForParticles = true;
     public bool stopParticlesEmitting = false;
     private float tick;

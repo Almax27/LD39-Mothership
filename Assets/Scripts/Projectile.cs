@@ -18,7 +18,8 @@ public class Projectile : MonoBehaviour {
     public List<GameObject> spawnOnHit = new List<GameObject>();
     public List<GameObject> spawnAutoDestruct = new List<GameObject>();
 
-    public bool waitForParticlesOnDestruct = true;
+    public ParticleSystem particlesToWaitForOnKill = null;
+    public GameObject contentToHideOnKill = null;
 
     public AudioClip fireSound = null;
     public float fireAudioVolume = 1;
@@ -48,10 +49,15 @@ public class Projectile : MonoBehaviour {
     {
         if(pendingDestroy)
         {
-            if(!audioSource.isPlaying)
+            bool keepAlive = audioSource.isPlaying;
+            keepAlive |= particlesToWaitForOnKill && particlesToWaitForOnKill.IsAlive(true);
+            if(!keepAlive)
             {
-                Destroy(this.gameObject);
+                //Destroy(this.gameObject);
+                this.gameObject.SetActive(false); //make inactive to be pooled
+                pendingDestroy = false;
             }
+            return;
         }
         tick += Time.deltaTime;
 
@@ -59,7 +65,7 @@ public class Projectile : MonoBehaviour {
 
         if (currentStage == null)
         {
-            SelfDestruct();
+            KillProjectile();
             return;
         }
 
@@ -87,7 +93,7 @@ public class Projectile : MonoBehaviour {
         }
         else
         {
-            SelfDestruct();
+            KillProjectile();
         }
         Vector3 position = transform.position + currentDirection.normalized * currentStage.speed * Time.deltaTime;
         transform.SetPositionAndRotation(position, Quaternion.LookRotation(currentDirection));
@@ -95,6 +101,9 @@ public class Projectile : MonoBehaviour {
 
     public void OnFired(Transform targetObject, Transform sourceObject, int damage, Vector3 initialPosition, Vector3 initialDirection)
     {
+        pendingDestroy = false;
+        tick = 0;
+
         target = targetObject;
         source = sourceObject;
         damageOnHit = damage;
@@ -121,6 +130,15 @@ public class Projectile : MonoBehaviour {
         if(fireSound != null)
         {
             PlaySound(fireSound, fireAudioVolume);
+        }
+
+        if (particlesToWaitForOnKill)
+        {
+            particlesToWaitForOnKill.Play(true);
+        }
+        if (contentToHideOnKill)
+        {
+            contentToHideOnKill.SetActive(true);
         }
     }
 
@@ -154,44 +172,26 @@ public class Projectile : MonoBehaviour {
             damagePacket.Send(target, source);
         }
 
-        float destroyDelay = 0;
         if (hitSound != null)
         {
-            destroyDelay = hitSound.length;
             PlaySound(hitSound, hitAudioVolume);
         }
 
-        HideAndDestroy();
-        target = null;
+        KillProjectile();
     }
 
-    void SelfDestruct()
+    void KillProjectile()
     {
-        foreach (GameObject objToSpawn in spawnAutoDestruct)
-        {
-            GameObject gobj = Instantiate<GameObject>(objToSpawn);
-            gobj.transform.position = this.transform.position;
-        }
-
         target = null;
-        if (waitForParticlesOnDestruct)
-        {
-            AutoDestruct autoDestruct = gameObject.AddComponent<AutoDestruct>();
-            autoDestruct.stopParticlesEmitting = true;
-        }
-        else
-        {
-            HideAndDestroy();
-        }
-    }
-
-    void HideAndDestroy()
-    {
-        foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
-        {
-            renderer.enabled = false;
-        }
         pendingDestroy = true;
+        if(particlesToWaitForOnKill)
+        {
+            particlesToWaitForOnKill.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
+        if(contentToHideOnKill)
+        {
+            contentToHideOnKill.SetActive(false);
+        }
     }
 
     void PlaySound(AudioClip clip, float volume)

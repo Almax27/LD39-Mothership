@@ -51,16 +51,18 @@ public class MissileWeapon : ShipWeapon
                 Ship shipToAttack = targetFleet.GetShipToAttack();
                 if (shipToAttack)
                 {
-                    GameObject gobj = Instantiate<GameObject>(projectilePrefab.gameObject);
-                    Projectile projectile = gobj.GetComponent<Projectile>();
+                    GameObject gobj = GameObjectPoolManager.Instance.GetOrCreate(projectilePrefab.gameObject);
+                    if (gobj != null)
+                    {
+                        Projectile projectile = gobj.GetComponent<Projectile>();
+                        Vector3 direction = shipToAttack.transform.position - transform.position;
+                        direction.Normalize();
+                        direction = Vector3.Cross(direction, Vector3.up);
+                        direction *= Random.value > 0.5f ? 1 : -1;
+                        direction = Quaternion.Euler(0, Random.Range(-missileAngleSpread, missileAngleSpread), 0) * direction;
 
-                    Vector3 direction = shipToAttack.transform.position - transform.position;
-                    direction.Normalize();
-                    direction = Vector3.Cross(direction, Vector3.up);
-                    direction *= Random.value > 0.5f ? 1 : -1;
-                    direction = Quaternion.Euler(0, Random.Range(-missileAngleSpread, missileAngleSpread), 0) * direction;
-
-                    projectile.OnFired(shipToAttack.transform, owningShip.transform, damagePerMissile, transform.position, direction);
+                        projectile.OnFired(shipToAttack.transform, owningShip.transform, damagePerMissile, transform.position, direction);
+                    }
                 }
             }
         }
